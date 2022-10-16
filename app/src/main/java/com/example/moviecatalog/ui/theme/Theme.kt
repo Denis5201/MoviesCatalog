@@ -13,8 +13,9 @@ private val DarkColorPalette = darkColors(
 
 private val LightColorPalette = lightColors(
     primary = Orange,
+    primaryVariant = White,
     secondary = Gray,
-    secondaryVariant = White,
+    secondaryVariant = Tint,
     background = OurBackground,
     surface = OurBackground,
     /*onPrimary = Color.White,

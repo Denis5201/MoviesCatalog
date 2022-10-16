@@ -16,14 +16,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.moviecatalog.ui.theme.MovieCatalogTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         setContent {
             MovieCatalogTheme {
@@ -85,8 +88,8 @@ fun InputLines() {
                 color = MaterialTheme.colors.primary),
             modifier =  Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = colorResource(id = R.color.grey_border),
-                unfocusedBorderColor = colorResource(id = R.color.grey_border)
+                focusedBorderColor = MaterialTheme.colors.secondaryVariant,
+                unfocusedBorderColor = MaterialTheme.colors.secondaryVariant
             ),
             shape = RoundedCornerShape(10.dp)
         )
@@ -104,10 +107,11 @@ fun InputLines() {
                 color = MaterialTheme.colors.primary),
             modifier =  Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = colorResource(id = R.color.grey_border),
-                unfocusedBorderColor = colorResource(id = R.color.grey_border)
+                focusedBorderColor = MaterialTheme.colors.secondaryVariant,
+                unfocusedBorderColor = MaterialTheme.colors.secondaryVariant
             ),
-            shape = RoundedCornerShape(10.dp)
+            shape = RoundedCornerShape(10.dp),
+            visualTransformation = PasswordVisualTransformation()
         )
     }
 }
@@ -127,7 +131,7 @@ fun Buttons() {
     ) {
         Button(onClick = {  },
             modifier = Modifier.fillMaxWidth(),
-            border = BorderStroke(1.dp, colorResource(id = R.color.grey_border)),
+            border = BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant),
             enabled = false
         ) {
             Text(text = "Войти",
