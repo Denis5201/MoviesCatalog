@@ -22,6 +22,9 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.moviecatalog.R
 import com.example.moviecatalog.Screen
 
+private var login = mutableStateOf("")
+private var password = mutableStateOf("")
+
 @Composable
 fun LoginScreen(navController: NavController) {
     Column {
@@ -34,17 +37,18 @@ fun LoginScreen(navController: NavController) {
 @Preview(showBackground = true)
 @Composable
 fun Logo() {
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .fillMaxHeight(0.3f)
-        .padding(top = 30.dp),
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(0.3f)
+            .padding(top = 30.dp),
         contentAlignment = Alignment.Center
     ) {
         Image(
             painter = painterResource(id = R.drawable.logo),
             contentDescription = "logo",
             modifier = Modifier
-                .fillMaxHeight()
+                .fillMaxHeight(0.9f)
                 .fillMaxWidth()
         )
     }
@@ -53,28 +57,34 @@ fun Logo() {
 @Preview(showBackground = true)
 @Composable
 fun InputLines() {
-    var login by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    //var login by remember { mutableStateOf("") }
+    //var password by remember { mutableStateOf("") }
 
-    Column(modifier = Modifier
-        .padding(
-            start = 15.dp,
-            top = 40.dp,
-            end = 15.dp
-        )
-        .fillMaxWidth()
-    ) {
-        OutlinedTextField(value = login,
-            onValueChange = {login = it},
-            placeholder = { Text(text = "Логин",
-                fontFamily = FontFamily(Font(R.font.ibm_plexsans)),
-                color = MaterialTheme.colors.secondary,
-                style = TextStyle(fontSize = 14.sp)
+    Column(
+        modifier = Modifier
+            .padding(
+                start = 15.dp,
+                top = 40.dp,
+                end = 15.dp
             )
+            .fillMaxWidth()
+    ) {
+        OutlinedTextField(
+            value = login.value,
+            onValueChange = { login.value = it },
+            placeholder = {
+                Text(
+                    text = "Логин",
+                    fontFamily = FontFamily(Font(R.font.ibm_plexsans)),
+                    color = MaterialTheme.colors.secondary,
+                    style = TextStyle(fontSize = 14.sp)
+                )
             },
-            textStyle = TextStyle(fontFamily = FontFamily(Font(R.font.ibm_plexsans)),
-                color = MaterialTheme.colors.primary),
-            modifier =  Modifier.fillMaxWidth(),
+            textStyle = TextStyle(
+                fontFamily = FontFamily(Font(R.font.ibm_plexsans)),
+                color = MaterialTheme.colors.primary
+            ),
+            modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = MaterialTheme.colors.secondaryVariant,
                 unfocusedBorderColor = MaterialTheme.colors.secondaryVariant
@@ -84,17 +94,22 @@ fun InputLines() {
 
         Spacer(modifier = Modifier.padding(10.dp))
 
-        OutlinedTextField(value = password,
-            onValueChange = {password = it},
-            placeholder = { Text(text = "Пароль",
-                fontFamily = FontFamily(Font(R.font.ibm_plexsans)),
-                color = MaterialTheme.colors.secondary,
-                style = TextStyle(fontSize = 14.sp)
-            )
+        OutlinedTextField(
+            value = password.value,
+            onValueChange = { password.value = it },
+            placeholder = {
+                Text(
+                    text = "Пароль",
+                    fontFamily = FontFamily(Font(R.font.ibm_plexsans)),
+                    color = MaterialTheme.colors.secondary,
+                    style = TextStyle(fontSize = 14.sp)
+                )
             },
-            textStyle = TextStyle(fontFamily = FontFamily(Font(R.font.ibm_plexsans)),
-                color = MaterialTheme.colors.primary),
-            modifier =  Modifier.fillMaxWidth(),
+            textStyle = TextStyle(
+                fontFamily = FontFamily(Font(R.font.ibm_plexsans)),
+                color = MaterialTheme.colors.primary
+            ),
+            modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = MaterialTheme.colors.secondaryVariant,
                 unfocusedBorderColor = MaterialTheme.colors.secondaryVariant
@@ -108,47 +123,64 @@ fun InputLines() {
 //@Preview(showBackground = true)
 @Composable
 fun Buttons(navController: NavController) {
-    Column(modifier = Modifier
-        .padding(
-            start = 15.dp,
-            bottom = 15.dp,
-            end = 15.dp
-        )
-        .fillMaxWidth()
-        .fillMaxHeight(),
+    Column(
+        modifier = Modifier
+            .padding(
+                start = 15.dp,
+                bottom = 15.dp,
+                end = 15.dp
+            )
+            .fillMaxWidth()
+            .fillMaxHeight(),
         verticalArrangement = Arrangement.Bottom
     ) {
-        Button(onClick = { },
+        Button(
+            onClick = {
+                navController.navigate(Screen.MainScreen.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
             modifier = Modifier.fillMaxWidth(),
             border = BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant),
-            enabled = true
+            enabled = (login.value.isNotEmpty() && password.value.isNotEmpty())
         ) {
-            Text(text = "Войти",
+            Text(
+                text = "Войти",
                 textAlign = TextAlign.Center,
                 fontFamily = FontFamily(Font(R.font.ibm_plexsans)),
                 fontSize = 20.sp,
-                color = MaterialTheme.colors.primaryVariant
+                color = if (login.value.isNotEmpty() && password.value.isNotEmpty()) {
+                    MaterialTheme.colors.primaryVariant
+                } else {
+                    MaterialTheme.colors.primary
+                }
             )
         }
 
         Spacer(modifier = Modifier.padding(8.dp))
 
-        Button(onClick = {
-            navController.navigate(Screen.RegistrationScreen.route) {
-                popUpTo(navController.graph.findStartDestination().id) {
-                    saveState = true
+        Button(
+            onClick = {
+                navController.navigate(Screen.RegistrationScreen.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
                 }
-                launchSingleTop = true
-                restoreState = true
-            }
-        },
+            },
             modifier = Modifier.fillMaxWidth(),
             border = BorderStroke(0.dp, MaterialTheme.colors.background),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.colors.background
             )
         ) {
-            Text(text = "Регистрация",
+            Text(
+                text = "Регистрация",
                 textAlign = TextAlign.Center,
                 fontFamily = FontFamily(Font(R.font.ibm_plexsans)),
                 fontSize = 20.sp,
