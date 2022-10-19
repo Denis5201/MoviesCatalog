@@ -1,5 +1,6 @@
 package com.example.moviecatalog
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable

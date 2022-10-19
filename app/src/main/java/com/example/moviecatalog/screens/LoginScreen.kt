@@ -3,20 +3,16 @@ package com.example.moviecatalog.screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.moviecatalog.R
@@ -69,54 +65,11 @@ fun InputLines() {
             )
             .fillMaxWidth()
     ) {
-        OutlinedTextField(
-            value = login.value,
-            onValueChange = { login.value = it },
-            placeholder = {
-                Text(
-                    text = "Логин",
-                    fontFamily = FontFamily(Font(R.font.ibm_plexsans)),
-                    color = MaterialTheme.colors.secondary,
-                    style = TextStyle(fontSize = 14.sp)
-                )
-            },
-            textStyle = TextStyle(
-                fontFamily = FontFamily(Font(R.font.ibm_plexsans)),
-                color = MaterialTheme.colors.primary
-            ),
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = MaterialTheme.colors.secondaryVariant,
-                unfocusedBorderColor = MaterialTheme.colors.secondaryVariant
-            ),
-            shape = RoundedCornerShape(10.dp)
-        )
+        OneInputLine(state = login, name = "Логин", isPassword = false)
 
         Spacer(modifier = Modifier.padding(10.dp))
 
-        OutlinedTextField(
-            value = password.value,
-            onValueChange = { password.value = it },
-            placeholder = {
-                Text(
-                    text = "Пароль",
-                    fontFamily = FontFamily(Font(R.font.ibm_plexsans)),
-                    color = MaterialTheme.colors.secondary,
-                    style = TextStyle(fontSize = 14.sp)
-                )
-            },
-            textStyle = TextStyle(
-                fontFamily = FontFamily(Font(R.font.ibm_plexsans)),
-                color = MaterialTheme.colors.primary
-            ),
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = MaterialTheme.colors.secondaryVariant,
-                unfocusedBorderColor = MaterialTheme.colors.secondaryVariant
-            ),
-            shape = RoundedCornerShape(10.dp),
-            visualTransformation = PasswordVisualTransformation()
-        )
+        OneInputLine(state = password, name = "Пароль", isPassword = true)
     }
 }
 
@@ -128,7 +81,8 @@ fun Buttons(navController: NavController) {
             .padding(
                 start = 15.dp,
                 bottom = 15.dp,
-                end = 15.dp
+                end = 15.dp,
+                top = 5.dp
             )
             .fillMaxWidth()
             .fillMaxHeight(),
@@ -151,8 +105,7 @@ fun Buttons(navController: NavController) {
             Text(
                 text = "Войти",
                 textAlign = TextAlign.Center,
-                fontFamily = FontFamily(Font(R.font.ibm_plexsans)),
-                fontSize = 20.sp,
+                style = MaterialTheme.typography.body2,
                 color = if (login.value.isNotEmpty() && password.value.isNotEmpty()) {
                     MaterialTheme.colors.primaryVariant
                 } else {
@@ -182,8 +135,7 @@ fun Buttons(navController: NavController) {
             Text(
                 text = "Регистрация",
                 textAlign = TextAlign.Center,
-                fontFamily = FontFamily(Font(R.font.ibm_plexsans)),
-                fontSize = 20.sp,
+                style = MaterialTheme.typography.body2,
                 color = MaterialTheme.colors.primary
             )
         }

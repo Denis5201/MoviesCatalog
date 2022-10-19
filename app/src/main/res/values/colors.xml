@@ -9,5 +9,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="grey_border">#B7B7B7</color>
     <color name="background">#150D0B</color>
-    <color name="statusBar">#4D000000</color>
+    <color name="statusBar">#B2000000</color>
+    <color name="orange">#EF3A01</color>
 </resources>

@@ -8,7 +8,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.moviecatalog.R
 
-private val IBMPlexSans = FontFamily(
+val IBMPlexSans = FontFamily(
     Font(R.font.ibm_plexsans)
 )
 
@@ -27,6 +27,7 @@ val Typography = Typography(
     h1 = TextStyle(
         fontFamily = IBMPlexSans,
         fontWeight = FontWeight.Bold,
-        fontSize = 24.sp
+        fontSize = 24.sp,
+        letterSpacing = 1.sp
     )
 )
