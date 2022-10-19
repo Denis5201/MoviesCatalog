@@ -2,7 +2,7 @@
 <resources>
 
     <style name="Theme.MovieCatalog" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">@color/purple_700</item>
+        <item name="android:statusBarColor">@color/statusBar</item>
     </style>
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo_good_size</item>
