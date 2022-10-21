@@ -11,4 +11,5 @@
     <color name="background">#150D0B</color>
     <color name="statusBar">#B2000000</color>
     <color name="orange">#EF3A01</color>
+    <color name="bottomBar">#1C1A19</color>
 </resources>
