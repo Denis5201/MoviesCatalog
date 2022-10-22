@@ -1,6 +1,8 @@
 package com.example.moviecatalog.ui.theme
 
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Typography
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -28,6 +30,13 @@ val Typography = Typography(
         fontFamily = IBMPlexSans,
         fontWeight = FontWeight.Bold,
         fontSize = 24.sp,
-        letterSpacing = 1.sp
+        letterSpacing = 1.sp,
+        color = Orange
+    ),
+    h2 = TextStyle(
+        fontFamily = IBMPlexSans,
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp,
+        color = White
     )
 )

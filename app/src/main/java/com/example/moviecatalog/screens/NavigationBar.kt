@@ -37,7 +37,7 @@ fun NavigationBar(navController: NavController) {
                         selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
                         onClick = {
                             navBarController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
+                                popUpTo(navBarController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
                                 launchSingleTop = true
