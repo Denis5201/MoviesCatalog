@@ -5,32 +5,32 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.moviecatalog.R
 import com.example.moviecatalog.Screen
 
-private var login = mutableStateOf("")
-private var password = mutableStateOf("")
+//private var login = mutableStateOf("")
+//private var password = mutableStateOf("")
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(
+    navController: NavController,
+    viewModel: LoginViewModel
+) {
     Column {
         Logo()
-        InputLines()
-        Buttons(navController)
+        InputLines(viewModel)
+        Buttons(navController, viewModel)
     }
 }
 
-@Preview(showBackground = true)
 @Composable
 fun Logo() {
     Box(
@@ -50,12 +50,8 @@ fun Logo() {
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun InputLines() {
-    //var login by remember { mutableStateOf("") }
-    //var password by remember { mutableStateOf("") }
-
+fun InputLines(viewModel: LoginViewModel) {
     Column(
         modifier = Modifier
             .padding(
@@ -65,17 +61,20 @@ fun InputLines() {
             )
             .fillMaxWidth()
     ) {
-        OneInputLine(state = login, name = "Логин", isPassword = false)
+        OneInputLine(state = viewModel.name.observeAsState(""), {viewModel.setName(it) },
+            name = "Логин", isPassword = false)
 
         Spacer(modifier = Modifier.padding(10.dp))
 
-        OneInputLine(state = password, name = "Пароль", isPassword = true)
+        OneInputLine(state = viewModel.password.observeAsState(""), {viewModel.setPassword(it) },
+            name = "Пароль", isPassword = true)
     }
 }
 
 //@Preview(showBackground = true)
 @Composable
-fun Buttons(navController: NavController) {
+fun Buttons(navController: NavController, viewModel: LoginViewModel) {
+    val enable by viewModel.entrance.observeAsState(false)
     Column(
         modifier = Modifier
             .padding(
@@ -100,13 +99,13 @@ fun Buttons(navController: NavController) {
             },
             modifier = Modifier.fillMaxWidth(),
             border = BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant),
-            enabled = (login.value.isNotEmpty() && password.value.isNotEmpty())
+            enabled = enable
         ) {
             Text(
                 text = "Войти",
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.body2,
-                color = if (login.value.isNotEmpty() && password.value.isNotEmpty()) {
+                color = if (enable) {
                     MaterialTheme.colors.primaryVariant
                 } else {
                     MaterialTheme.colors.primary

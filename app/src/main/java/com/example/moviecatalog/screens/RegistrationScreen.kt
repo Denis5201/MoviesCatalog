@@ -94,23 +94,23 @@ fun RegistrationLines() {
             .fillMaxHeight(0.72f)
             .verticalScroll(rememberScrollState())
     ) {
-        OneInputLine(state = login, name = "Логин", isPassword = false)
+        //OneInputLine(state = login, name = "Логин", isPassword = false)
 
         Spacer(modifier = Modifier.padding(10.dp))
 
-        OneInputLine(state = mail, name = "E-mail", isPassword = false)
+        //OneInputLine(state = mail, name = "E-mail", isPassword = false)
 
         Spacer(modifier = Modifier.padding(10.dp))
 
-        OneInputLine(state = name, name = "Имя", isPassword = false)
+        //OneInputLine(state = name, name = "Имя", isPassword = false)
 
         Spacer(modifier = Modifier.padding(10.dp))
 
-        OneInputLine(state = password, name = "Пароль", isPassword = true)
+        //OneInputLine(state = password, name = "Пароль", isPassword = true)
 
         Spacer(modifier = Modifier.padding(10.dp))
 
-        OneInputLine(state = confirm, name = "Подтвердите пароль", isPassword = true)
+        //OneInputLine(state = confirm, name = "Подтвердите пароль", isPassword = true)
 
         Spacer(modifier = Modifier.padding(10.dp))
 

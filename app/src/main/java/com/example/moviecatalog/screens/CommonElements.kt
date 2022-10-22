@@ -7,16 +7,17 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 
 @Composable
-fun OneInputLine(state: MutableState<String>, name: String, isPassword: Boolean) {
+fun OneInputLine(state: State<String>, valChange: (String) -> Unit, name: String, isPassword: Boolean) {
     OutlinedTextField(
         value = state.value,
-        onValueChange = { state.value = it },
+        onValueChange = { valChange(it) },
         placeholder = {
             Text(
                 text = name,
