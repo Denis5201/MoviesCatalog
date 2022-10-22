@@ -40,7 +40,6 @@ fun RegistrationScreen(navController: NavController) {
         SmallLogo()
         Text(
             text = "Регистрация",
-            color = MaterialTheme.colors.primary,
             style = MaterialTheme.typography.h1,
             modifier = Modifier.padding(start = 15.dp, top = 15.dp)
         )
