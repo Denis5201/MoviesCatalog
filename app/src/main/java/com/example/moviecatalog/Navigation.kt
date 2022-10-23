@@ -5,11 +5,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.moviecatalog.screens.LoginScreen
-import com.example.moviecatalog.screens.LoginViewModel
-import com.example.moviecatalog.screens.MainScreen
-import com.example.moviecatalog.screens.NavigationBar
-import com.example.moviecatalog.screens.RegistrationScreen
+import com.example.moviecatalog.screens.*
 
 @Composable
 fun Navigate() {
@@ -21,7 +17,8 @@ fun Navigate() {
             LoginScreen(navController = navController, loginViewModel)
         }
         composable(Screen.RegistrationScreen.route) {
-            RegistrationScreen(navController = navController)
+            val registrationViewModel = viewModel<RegistrationViewModel>()
+            RegistrationScreen(navController = navController, registrationViewModel)
         }
         composable(Screen.MainScreen.route) {
             NavigationBar(navController = navController)

@@ -8,7 +8,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -24,18 +25,11 @@ import com.example.moviecatalog.R
 import com.example.moviecatalog.Screen
 import java.util.*
 
-private var login = mutableStateOf("")
-private var mail = mutableStateOf("")
-private var name = mutableStateOf("")
-private var password = mutableStateOf("")
-private var confirm = mutableStateOf("")
-private var date = mutableStateOf("")
-
-private var gender = listOf(0, 1, 2)
-private var select = mutableStateOf(gender[0])
-
 @Composable
-fun RegistrationScreen(navController: NavController) {
+fun RegistrationScreen(
+    navController: NavController,
+    viewModel: RegistrationViewModel
+) {
     Column {
         SmallLogo()
         Text(
@@ -43,8 +37,8 @@ fun RegistrationScreen(navController: NavController) {
             style = MaterialTheme.typography.h1,
             modifier = Modifier.padding(start = 15.dp, top = 15.dp)
         )
-        RegistrationLines()
-        RegButtons(navController)
+        RegistrationLines(viewModel)
+        RegButtons(navController, viewModel)
     }
 }
 
@@ -68,7 +62,7 @@ fun SmallLogo() {
 }
 
 @Composable
-fun RegistrationLines() {
+fun RegistrationLines(viewModel: RegistrationViewModel) {
     val calendar = Calendar.getInstance()
     val year = calendar.get(Calendar.YEAR)
     val month = calendar.get(Calendar.MONTH)
@@ -79,7 +73,7 @@ fun RegistrationLines() {
         LocalContext.current,
         {
                 _:DatePicker, year: Int, month:Int, dayOfMount: Int ->
-            date.value = "$dayOfMount.${month+1}.$year"
+            viewModel.setDate("$dayOfMount.${month+1}.$year")
         }, year, month, day
     )
     Column(
@@ -93,29 +87,34 @@ fun RegistrationLines() {
             .fillMaxHeight(0.72f)
             .verticalScroll(rememberScrollState())
     ) {
-        //OneInputLine(state = login, name = "Логин", isPassword = false)
+        OneInputLine(state = viewModel.login.observeAsState(""), {viewModel.setLogin(it)},
+            name = "Логин", isPassword = false)
 
         Spacer(modifier = Modifier.padding(10.dp))
 
-        //OneInputLine(state = mail, name = "E-mail", isPassword = false)
+        OneInputLine(state = viewModel.mail.observeAsState(""), {viewModel.setMail(it)},
+            name = "E-mail", isPassword = false)
 
         Spacer(modifier = Modifier.padding(10.dp))
 
-        //OneInputLine(state = name, name = "Имя", isPassword = false)
+        OneInputLine(state = viewModel.name.observeAsState(""), {viewModel.setName(it)},
+            name = "Имя", isPassword = false)
 
         Spacer(modifier = Modifier.padding(10.dp))
 
-        //OneInputLine(state = password, name = "Пароль", isPassword = true)
+        OneInputLine(state = viewModel.password.observeAsState(""), {viewModel.setPassword(it)},
+            name = "Пароль", isPassword = true)
 
         Spacer(modifier = Modifier.padding(10.dp))
 
-        //OneInputLine(state = confirm, name = "Подтвердите пароль", isPassword = true)
+        OneInputLine(state = viewModel.confirmPassword.observeAsState(""), {viewModel.setConfirmPassword(it)},
+            name = "Подтвердите пароль", isPassword = true)
 
         Spacer(modifier = Modifier.padding(10.dp))
 
         OutlinedTextField(
-            value = date.value,
-            onValueChange = { date.value = it },
+            value = viewModel.date.observeAsState("").value,
+            onValueChange = { viewModel.setDate(it) },
             trailingIcon = {
                 Icon(imageVector = ImageVector.vectorResource(R.drawable.date_icon),
                     contentDescription = "Календарь",
@@ -152,11 +151,11 @@ fun RegistrationLines() {
 
         Row(modifier = Modifier.fillMaxWidth()){
             Button(
-                onClick = {select.value = 1},
+                onClick = {viewModel.setSelectGender(1)},
                 border = BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant),
                 modifier = Modifier.fillMaxWidth(0.5f),
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = if (select.value != gender[1]) {
+                    backgroundColor = if (viewModel.selectGender.value != 1) {
                         MaterialTheme.colors.background
                     } else {
                         MaterialTheme.colors.primary
@@ -168,7 +167,7 @@ fun RegistrationLines() {
                     text = "Мужчина",
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.body2,
-                    color = if (select.value == gender[1]) {
+                    color = if (viewModel.selectGender.value == 1) {
                         MaterialTheme.colors.primaryVariant
                     } else {
                         MaterialTheme.colors.primary
@@ -176,11 +175,11 @@ fun RegistrationLines() {
                 )
             }
             Button(
-                onClick = {select.value = 2},
+                onClick = {viewModel.setSelectGender(2)},
                 border = BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant),
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = if (select.value != gender[2]) {
+                    backgroundColor = if (viewModel.selectGender.value != 2) {
                         MaterialTheme.colors.background
                     } else {
                         MaterialTheme.colors.primary
@@ -192,7 +191,7 @@ fun RegistrationLines() {
                     text = "Женщина",
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.body2,
-                    color = if (select.value == gender[2]) {
+                    color = if (viewModel.selectGender.value == 2) {
                         MaterialTheme.colors.primaryVariant
                     } else {
                         MaterialTheme.colors.primary
@@ -205,7 +204,9 @@ fun RegistrationLines() {
 }
 
 @Composable
-fun RegButtons(navController: NavController) {
+fun RegButtons(navController: NavController, viewModel: RegistrationViewModel) {
+    val enable by viewModel.registration.observeAsState(false)
+
     Column(
         modifier = Modifier
             .padding(
@@ -230,15 +231,13 @@ fun RegButtons(navController: NavController) {
             },
             modifier = Modifier.fillMaxWidth(),
             border = BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant),
-            enabled = (login.value.isNotEmpty() && mail.value.isNotEmpty()
-                    && name.value.isNotEmpty() && password.value.isNotEmpty()
-                    && confirm.value.isNotEmpty() && date.value.isNotEmpty() && select.value !=0)
+            enabled = enable
         ) {
             Text(
                 text = "Зарегистрироваться",
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.body2,
-                color = if (login.value.isNotEmpty() && password.value.isNotEmpty()) {
+                color = if (enable) {
                     MaterialTheme.colors.primaryVariant
                 } else {
                     MaterialTheme.colors.primary

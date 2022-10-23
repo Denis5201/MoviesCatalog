@@ -3,8 +3,12 @@ package com.example.moviecatalog.screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,9 +19,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.moviecatalog.R
 import com.example.moviecatalog.Screen
-
-//private var login = mutableStateOf("")
-//private var password = mutableStateOf("")
 
 @Composable
 fun LoginScreen(
@@ -75,6 +76,7 @@ fun InputLines(viewModel: LoginViewModel) {
 @Composable
 fun Buttons(navController: NavController, viewModel: LoginViewModel) {
     val enable by viewModel.entrance.observeAsState(false)
+
     Column(
         modifier = Modifier
             .padding(
