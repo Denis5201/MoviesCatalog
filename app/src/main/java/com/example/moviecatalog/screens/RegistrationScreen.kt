@@ -76,6 +76,8 @@ fun RegistrationLines(viewModel: RegistrationViewModel) {
             viewModel.setDate("$dayOfMount.${month+1}.$year")
         }, year, month, day
     )
+    val selectGender by viewModel.selectGender.observeAsState(0)
+
     Column(
         modifier = Modifier
             .padding(
@@ -155,7 +157,7 @@ fun RegistrationLines(viewModel: RegistrationViewModel) {
                 border = BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant),
                 modifier = Modifier.fillMaxWidth(0.5f),
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = if (viewModel.selectGender.value != 1) {
+                    backgroundColor = if (selectGender != 1) {
                         MaterialTheme.colors.background
                     } else {
                         MaterialTheme.colors.primary
@@ -167,7 +169,7 @@ fun RegistrationLines(viewModel: RegistrationViewModel) {
                     text = "Мужчина",
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.body2,
-                    color = if (viewModel.selectGender.value == 1) {
+                    color = if (selectGender == 1) {
                         MaterialTheme.colors.primaryVariant
                     } else {
                         MaterialTheme.colors.primary
@@ -179,7 +181,7 @@ fun RegistrationLines(viewModel: RegistrationViewModel) {
                 border = BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant),
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = if (viewModel.selectGender.value != 2) {
+                    backgroundColor = if (selectGender != 2) {
                         MaterialTheme.colors.background
                     } else {
                         MaterialTheme.colors.primary
@@ -191,7 +193,7 @@ fun RegistrationLines(viewModel: RegistrationViewModel) {
                     text = "Женщина",
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.body2,
-                    color = if (viewModel.selectGender.value == 2) {
+                    color = if (selectGender == 2) {
                         MaterialTheme.colors.primaryVariant
                     } else {
                         MaterialTheme.colors.primary
@@ -230,7 +232,7 @@ fun RegButtons(navController: NavController, viewModel: RegistrationViewModel) {
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            border = BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant),
+            border = if (enable) null else BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant),
             enabled = enable
         ) {
             Text(
@@ -245,7 +247,7 @@ fun RegButtons(navController: NavController, viewModel: RegistrationViewModel) {
             )
         }
 
-        Spacer(modifier = Modifier.padding(8.dp))
+        Spacer(modifier = Modifier.padding(4.dp))
 
         Button(
             onClick = {

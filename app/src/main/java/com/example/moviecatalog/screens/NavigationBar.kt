@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.vectorResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -51,7 +52,10 @@ fun NavigationBar(navController: NavController) {
     ) { innerPadding ->
         NavHost(navController = navBarController, startDestination = BottomNavItem.Main.route, Modifier.padding(innerPadding)) {
             composable(BottomNavItem.Main.route) { MainScreen(navController) }
-            composable(BottomNavItem.Profile.route) { ProfileScreen(navController) }
+            composable(BottomNavItem.Profile.route) {
+                val profileViewModel = viewModel<ProfileViewModel>()
+                ProfileScreen(navController, profileViewModel)
+            }
         }
     }
 }

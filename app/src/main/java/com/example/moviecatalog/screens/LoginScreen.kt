@@ -100,7 +100,7 @@ fun Buttons(navController: NavController, viewModel: LoginViewModel) {
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            border = BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant),
+            border = if (enable) null else BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant),
             enabled = enable
         ) {
             Text(
@@ -115,7 +115,7 @@ fun Buttons(navController: NavController, viewModel: LoginViewModel) {
             )
         }
 
-        Spacer(modifier = Modifier.padding(8.dp))
+        Spacer(modifier = Modifier.padding(4.dp))
 
         Button(
             onClick = {
