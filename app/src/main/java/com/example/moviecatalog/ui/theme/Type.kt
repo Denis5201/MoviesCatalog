@@ -42,5 +42,10 @@ val Typography = Typography(
         fontWeight = FontWeight.Bold,
         fontSize = 24.sp,
         color = White
-)
+    ),
+    h5 = TextStyle(
+        fontFamily = IBMPlexSans,
+        fontWeight = FontWeight.Medium,
+        fontSize = 16.sp
+    )
 )

@@ -5,7 +5,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.moviecatalog.screens.*
+import com.example.moviecatalog.screens.NavigationBar
+import com.example.moviecatalog.screens.login.LoginScreen
+import com.example.moviecatalog.screens.login.LoginViewModel
+import com.example.moviecatalog.screens.main.MainScreen
+import com.example.moviecatalog.screens.registration.RegistrationScreen
+import com.example.moviecatalog.screens.registration.RegistrationViewModel
 
 @Composable
 fun Navigate() {

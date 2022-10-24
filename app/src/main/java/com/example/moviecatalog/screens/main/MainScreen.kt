@@ -1,4 +1,4 @@
-package com.example.moviecatalog.screens
+package com.example.moviecatalog.screens.main
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -6,9 +6,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,10 +18,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.moviecatalog.R
 import com.example.moviecatalog.domain.Movie
@@ -70,14 +71,14 @@ fun Banner() {
             onClick = {  },
             modifier = Modifier.padding(bottom = 5.dp)
         ) {
-            Text(text = "Смотреть")
+            Text(text = stringResource(R.string.watching))
         }
     }
 }
 
 @Composable
 fun Favourites() {
-    Text(text = "Избранное",
+    Text(text = stringResource(R.string.favour),
         style = MaterialTheme.typography.h1,
         modifier = Modifier.padding(top = 16.dp)
     )
@@ -123,7 +124,7 @@ fun Gallery() {
             Favourites()
         }
         item {
-            Text(text = "Галерея",
+            Text(text = stringResource(R.string.gallery),
                 style = MaterialTheme.typography.h1,
                 modifier = Modifier.padding(top = 16.dp))
             Spacer(modifier = Modifier.padding(8.dp))
@@ -147,7 +148,9 @@ fun Gallery() {
                 }
                 Column(modifier = Modifier
                     .padding(start = 16.dp)
-                    .fillMaxHeight()) {
+                    .fillMaxHeight()
+                    .fillMaxWidth()
+                ) {
                     Text(text = item.name, style = MaterialTheme.typography.h2)
                     Text(
                         text = "${item.year} • ${item.country}",
@@ -161,7 +164,7 @@ fun Gallery() {
                     )
                     Row(modifier = Modifier
                         .fillMaxHeight()
-                        .padding(top = if(item.name.length < 20) 40.dp else if(item.name.length < 40) 20.dp else 0.dp),
+                        .padding(top = if (item.name.length < 20) 40.dp else if (item.name.length < 40) 20.dp else 0.dp),
                         verticalAlignment = Alignment.Bottom) {
                         Text(
                             text = item.mark.toString(),
@@ -180,9 +183,6 @@ fun Gallery() {
                                 )
                         )
                     }
-
-
-
                 }
             }
 

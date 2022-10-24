@@ -17,6 +17,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.moviecatalog.R
+import com.example.moviecatalog.screens.main.MainScreen
+import com.example.moviecatalog.screens.profile.ProfileScreen
+import com.example.moviecatalog.screens.profile.ProfileViewModel
 
 @Composable
 fun NavigationBar(navController: NavController) {
@@ -24,9 +27,9 @@ fun NavigationBar(navController: NavController) {
     Scaffold(
         bottomBar = {
             val items = listOf(BottomNavItem.Main, BottomNavItem.Profile)
-            BottomNavigation (
+            BottomNavigation(
                 backgroundColor = colorResource(R.color.bottomBar)
-                    ) {
+            ) {
                 val navBackStackEntry by navBarController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
                 items.forEach { item ->
@@ -50,7 +53,11 @@ fun NavigationBar(navController: NavController) {
             }
         }
     ) { innerPadding ->
-        NavHost(navController = navBarController, startDestination = BottomNavItem.Main.route, Modifier.padding(innerPadding)) {
+        NavHost(
+            navController = navBarController,
+            startDestination = BottomNavItem.Main.route,
+            Modifier.padding(innerPadding)
+        ) {
             composable(BottomNavItem.Main.route) { MainScreen(navController) }
             composable(BottomNavItem.Profile.route) {
                 val profileViewModel = viewModel<ProfileViewModel>()
