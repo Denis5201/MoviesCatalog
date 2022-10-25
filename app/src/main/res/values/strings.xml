@@ -20,4 +20,6 @@
     <string name="calendar_description">Календарь</string>
     <string name="man">Мужчина</string>
     <string name="woman">Женщина</string>
+    <string name="wrong_format_mail">Неверный формат почты!</string>
+    <string name="passwords_not_equal">Поля \"Пароль\" и \"Подтвердите пароль\" не совпадают!</string>
 </resources>

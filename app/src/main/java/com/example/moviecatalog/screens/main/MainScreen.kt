@@ -83,7 +83,7 @@ fun Favourites() {
         modifier = Modifier.padding(top = 16.dp)
     )
     Spacer(modifier = Modifier.padding(8.dp))
-    LazyRow {
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         items(movies) { item ->
             Box(
                 contentAlignment = Alignment.TopEnd,

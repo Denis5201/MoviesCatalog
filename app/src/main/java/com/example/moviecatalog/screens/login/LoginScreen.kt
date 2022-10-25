@@ -10,6 +10,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.moviecatalog.R
 import com.example.moviecatalog.Screen
 import com.example.moviecatalog.screens.FirstButton
@@ -89,7 +90,16 @@ fun Buttons(navController: NavController, viewModel: LoginViewModel) {
         FirstButton(
             name = stringResource(R.string.enter),
             navController = navController,
-            state = viewModel.entrance.observeAsState(false)
+            state = viewModel.entrance.observeAsState(false),
+            click = {
+                navController.navigate(Screen.MainScreen.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
         )
 
         Spacer(modifier = Modifier.padding(4.dp))

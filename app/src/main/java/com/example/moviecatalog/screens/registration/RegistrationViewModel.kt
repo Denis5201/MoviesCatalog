@@ -1,5 +1,6 @@
 package com.example.moviecatalog.screens.registration
 
+import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,6 +18,7 @@ class RegistrationViewModel : ViewModel() {
     fun setMail(value: String) {
         _mail.value = value
         mayRegister()
+        isCorrectMail()
     }
 
     private val _name = MutableLiveData("")
@@ -31,6 +33,7 @@ class RegistrationViewModel : ViewModel() {
     fun setPassword(value: String) {
         _password.value = value
         mayRegister()
+        isEqualPasswords()
     }
 
     private val _confirmPassword = MutableLiveData("")
@@ -38,6 +41,7 @@ class RegistrationViewModel : ViewModel() {
     fun setConfirmPassword(value: String) {
         _confirmPassword.value = value
         mayRegister()
+        isEqualPasswords()
     }
 
     private val _date = MutableLiveData("")
@@ -58,10 +62,24 @@ class RegistrationViewModel : ViewModel() {
     private val _registration = MutableLiveData(false)
     val registration: LiveData<Boolean> = _registration
 
+    private val _correctMail = MutableLiveData(false)
+    val correctMail: LiveData<Boolean> = _correctMail
+
+    private val _equalPasswords = MutableLiveData(false)
+    val equalPasswords: LiveData<Boolean> = _equalPasswords
+
     private fun mayRegister() {
         _registration.value = _login.value!!.isNotEmpty() && _mail.value!!.isNotEmpty()
                 && _name.value!!.isNotEmpty() && _password.value!!.isNotEmpty()
                 && _confirmPassword.value!!.isNotEmpty() && date.value!!.isNotEmpty()
                 && _selectGender.value != 0
+    }
+
+    private fun isCorrectMail() {
+        _correctMail.value = Patterns.EMAIL_ADDRESS.matcher(_mail.value!!).matches()
+    }
+
+    private fun isEqualPasswords() {
+        _equalPasswords.value = _password.value == _confirmPassword.value
     }
 }

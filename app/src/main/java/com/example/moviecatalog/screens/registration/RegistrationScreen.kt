@@ -1,5 +1,6 @@
 package com.example.moviecatalog.screens.registration
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -10,10 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.moviecatalog.R
 import com.example.moviecatalog.Screen
 import com.example.moviecatalog.screens.*
@@ -59,12 +62,12 @@ fun RegistrationLines(viewModel: RegistrationViewModel) {
     Column(
         modifier = Modifier
             .padding(
-                start = 10.dp,
-                top = 20.dp,
-                end = 15.dp
+                start = 16.dp,
+                top = 16.dp,
+                end = 16.dp
             )
             .fillMaxWidth()
-            .fillMaxHeight(0.72f)
+            .fillMaxHeight(0.68f)
             .verticalScroll(rememberScrollState())
     ) {
         OneInputLine(
@@ -116,13 +119,14 @@ fun RegistrationLines(viewModel: RegistrationViewModel) {
 
 @Composable
 fun RegButtons(navController: NavController, viewModel: RegistrationViewModel) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .padding(
-                start = 15.dp,
-                bottom = 15.dp,
-                end = 15.dp,
-                top = 5.dp
+                start = 16.dp,
+                bottom = 16.dp,
+                end = 16.dp,
+                top = 32.dp
             )
             .fillMaxWidth()
             .fillMaxHeight(),
@@ -131,7 +135,24 @@ fun RegButtons(navController: NavController, viewModel: RegistrationViewModel) {
         FirstButton(
             name = stringResource(R.string.set_registration),
             navController = navController,
-            state = viewModel.registration.observeAsState(false)
+            state = viewModel.registration.observeAsState(false),
+            click = {
+                if (viewModel.correctMail.value!!) {
+                    if (viewModel.equalPasswords.value!!) {
+                        navController.navigate(Screen.MainScreen.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    } else {
+                        Toast.makeText(context, R.string.passwords_not_equal, Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    Toast.makeText(context, R.string.wrong_format_mail, Toast.LENGTH_LONG).show()
+                }
+            }
         )
 
         Spacer(modifier = Modifier.padding(4.dp))

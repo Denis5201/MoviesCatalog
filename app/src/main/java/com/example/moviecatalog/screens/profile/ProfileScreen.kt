@@ -1,7 +1,9 @@
 package com.example.moviecatalog.screens.profile
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -12,6 +14,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.moviecatalog.R
 import com.example.moviecatalog.Screen
 import com.example.moviecatalog.screens.*
@@ -49,61 +52,69 @@ fun Header() {
 
 @Composable
 fun ProfileLines(viewModel: ProfileViewModel) {
-    Text(
-        text = stringResource(R.string.mail),
-        modifier = Modifier.padding(top = 16.dp),
-        style = MaterialTheme.typography.h5,
-        color = MaterialTheme.colors.secondaryVariant
-    )
-    Spacer(modifier = Modifier.padding(4.dp))
-    OneInputLine(
-        state = viewModel.mail.observeAsState(""), { viewModel.setMail(it) },
-        name = stringResource(R.string.mail), isPassword = false
-    )
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(0.70f)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Text(
+            text = stringResource(R.string.mail),
+            modifier = Modifier.padding(top = 16.dp),
+            style = MaterialTheme.typography.h5,
+            color = MaterialTheme.colors.secondaryVariant
+        )
+        Spacer(modifier = Modifier.padding(4.dp))
+        OneInputLine(
+            state = viewModel.mail.observeAsState(""), { viewModel.setMail(it) },
+            name = stringResource(R.string.mail), isPassword = false
+        )
 
-    Text(
-        text = stringResource(R.string.link_avatar),
-        modifier = Modifier.padding(top = 10.dp),
-        style = MaterialTheme.typography.h5,
-        color = MaterialTheme.colors.secondaryVariant
-    )
-    Spacer(modifier = Modifier.padding(4.dp))
-    OneInputLine(
-        state = viewModel.avatar.observeAsState(""), { viewModel.setAvatar(it) },
-        name = stringResource(R.string.link_avatar), isPassword = false
-    )
+        Text(
+            text = stringResource(R.string.link_avatar),
+            modifier = Modifier.padding(top = 10.dp),
+            style = MaterialTheme.typography.h5,
+            color = MaterialTheme.colors.secondaryVariant
+        )
+        Spacer(modifier = Modifier.padding(4.dp))
+        OneInputLine(
+            state = viewModel.avatar.observeAsState(""), { viewModel.setAvatar(it) },
+            name = stringResource(R.string.link_avatar), isPassword = false
+        )
 
-    Text(
-        text = stringResource(R.string.name),
-        modifier = Modifier.padding(top = 10.dp),
-        style = MaterialTheme.typography.h5,
-        color = MaterialTheme.colors.secondaryVariant
-    )
-    Spacer(modifier = Modifier.padding(4.dp))
-    OneInputLine(
-        state = viewModel.name.observeAsState(""), { viewModel.setName(it) },
-        name = stringResource(R.string.name), isPassword = false
-    )
+        Text(
+            text = stringResource(R.string.name),
+            modifier = Modifier.padding(top = 10.dp),
+            style = MaterialTheme.typography.h5,
+            color = MaterialTheme.colors.secondaryVariant
+        )
+        Spacer(modifier = Modifier.padding(4.dp))
+        OneInputLine(
+            state = viewModel.name.observeAsState(""), { viewModel.setName(it) },
+            name = stringResource(R.string.name), isPassword = false
+        )
 
-    Text(
-        text = stringResource(R.string.date_birthday),
-        modifier = Modifier.padding(top = 10.dp),
-        style = MaterialTheme.typography.h5,
-        color = MaterialTheme.colors.secondaryVariant
-    )
-    Spacer(modifier = Modifier.padding(4.dp))
-    DateDialog(state = viewModel.date.observeAsState(""), valChange = { viewModel.setDate(it) })
+        Text(
+            text = stringResource(R.string.date_birthday),
+            modifier = Modifier.padding(top = 10.dp),
+            style = MaterialTheme.typography.h5,
+            color = MaterialTheme.colors.secondaryVariant
+        )
+        Spacer(modifier = Modifier.padding(4.dp))
+        DateDialog(state = viewModel.date.observeAsState(""), valChange = { viewModel.setDate(it) })
 
-    Text(
-        text = stringResource(R.string.gender),
-        modifier = Modifier.padding(top = 10.dp),
-        style = MaterialTheme.typography.h5,
-        color = MaterialTheme.colors.secondaryVariant
-    )
-    Spacer(modifier = Modifier.padding(4.dp))
-    ChoosingGender(
-        state = viewModel.selectGender.observeAsState(0),
-        valChange = { viewModel.setSelectGender(it) })
+        Text(
+            text = stringResource(R.string.gender),
+            modifier = Modifier.padding(top = 10.dp),
+            style = MaterialTheme.typography.h5,
+            color = MaterialTheme.colors.secondaryVariant
+        )
+        Spacer(modifier = Modifier.padding(4.dp))
+        ChoosingGender(
+            state = viewModel.selectGender.observeAsState(0),
+            valChange = { viewModel.setSelectGender(it) }
+        )
+    }
 }
 
 @Composable
@@ -111,8 +122,8 @@ fun ProfileButtons(navController: NavController, viewModel: ProfileViewModel) {
     Column(
         modifier = Modifier
             .padding(
-                bottom = 15.dp,
-                top = 5.dp
+                bottom = 16.dp,
+                top = 32.dp
             )
             .fillMaxWidth()
             .fillMaxHeight(),
@@ -121,7 +132,16 @@ fun ProfileButtons(navController: NavController, viewModel: ProfileViewModel) {
         FirstButton(
             name = stringResource(R.string.save),
             navController = navController,
-            state = viewModel.save.observeAsState(false)
+            state = viewModel.save.observeAsState(false),
+            click = {
+                navController.navigate(Screen.MainScreen.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
         )
 
         Spacer(modifier = Modifier.padding(4.dp))

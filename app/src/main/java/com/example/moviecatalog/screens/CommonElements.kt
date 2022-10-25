@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.moviecatalog.R
-import com.example.moviecatalog.Screen
 import java.util.*
 
 @Composable
@@ -174,18 +173,11 @@ fun ChoosingGender(state: State<Int>, valChange: (Int) -> Unit) {
 fun FirstButton(
     name: String,
     navController: NavController,
-    state: State<Boolean>
+    state: State<Boolean>,
+    click: () -> Unit
 ) {
     Button(
-        onClick = {
-            navController.navigate(Screen.MainScreen.route) {
-                popUpTo(navController.graph.findStartDestination().id) {
-                    saveState = true
-                }
-                launchSingleTop = true
-                restoreState = true
-            }
-        },
+        onClick = { click() },
         modifier = Modifier.fillMaxWidth(),
         border = if (state.value) {
             null
