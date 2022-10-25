@@ -2,6 +2,7 @@ package com.example.moviecatalog.screens.main
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -23,7 +24,9 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.moviecatalog.R
+import com.example.moviecatalog.Screen
 import com.example.moviecatalog.domain.Movie
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
@@ -32,13 +35,13 @@ import com.skydoves.landscapist.glide.GlideImage
 @Composable
 fun MainScreen(navController: NavController) {
     Column {
-        Banner()
-        Gallery()
+        Banner(navController)
+        Gallery(navController)
     }
 }
 
 var movies = listOf(
-    Movie("1", "Звёдзные войны: Эпизод 8 sdfgsdfgsdgggsdgdssdfgsdgsfgsdgdsgfdssdgds", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA", listOf("фантастика", "боевик"), 1.0),
+    Movie("1", "Звёдзные войны: Последние джедаи (Эпизод 8)", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA", listOf("фантастика", "боевик"), 1.0),
     Movie("2", "ЗВ", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA", listOf("фантастика", "боевик"), 2.0),
     Movie("3", "ЗВ", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA", listOf("фантастика", "боевик"), 3.0),
     Movie("4", "ЗВ", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA", listOf("фантастика", "боевик"), 4.2),
@@ -51,10 +54,11 @@ var movies = listOf(
 )
 
 @Composable
-fun Banner() {
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .fillMaxHeight(0.4f),
+fun Banner(navController: NavController) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(0.4f),
         contentAlignment = Alignment.BottomCenter
     ) {
         GlideImage(
@@ -68,7 +72,15 @@ fun Banner() {
                 .fillMaxWidth()
         )
         Button(
-            onClick = {  },
+            onClick = {
+                navController.navigate(Screen.MovieScreen.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
             modifier = Modifier.padding(bottom = 5.dp)
         ) {
             Text(text = stringResource(R.string.watching))
@@ -77,8 +89,9 @@ fun Banner() {
 }
 
 @Composable
-fun Favourites() {
-    Text(text = stringResource(R.string.favour),
+fun Favourites(navController: NavController) {
+    Text(
+        text = stringResource(R.string.favour),
         style = MaterialTheme.typography.h1,
         modifier = Modifier.padding(top = 16.dp)
     )
@@ -98,6 +111,15 @@ fun Favourites() {
                     modifier = Modifier
                         .fillMaxHeight()
                         .fillMaxWidth()
+                        .clickable {
+                            navController.navigate(Screen.MovieScreen.route) {
+                                popUpTo(Screen.MainScreen.route) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
                 )
                 Button(
                     onClick = { },
@@ -115,22 +137,35 @@ fun Favourites() {
 }
 
 @Composable
-fun Gallery() {
+fun Gallery(navController: NavController) {
     LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
     ) {
         item {
-            Favourites()
+            Favourites(navController)
         }
         item {
-            Text(text = stringResource(R.string.gallery),
+            Text(
+                text = stringResource(R.string.gallery),
                 style = MaterialTheme.typography.h1,
-                modifier = Modifier.padding(top = 16.dp))
+                modifier = Modifier.padding(top = 16.dp)
+            )
             Spacer(modifier = Modifier.padding(8.dp))
         }
         items(movies) { item ->
-            Row(modifier = Modifier.heightIn(min = 144.dp)) {
+            Row(modifier = Modifier
+                .heightIn(min = 144.dp)
+                .clickable {
+                    navController.navigate(Screen.MovieScreen.route) {
+                        popUpTo(Screen.MainScreen.route) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            ) {
                 Box(
                     modifier = Modifier
                         .size(100.dp, 144.dp)
@@ -146,10 +181,11 @@ fun Gallery() {
                             .fillMaxWidth()
                     )
                 }
-                Column(modifier = Modifier
-                    .padding(start = 16.dp)
-                    .fillMaxHeight()
-                    .fillMaxWidth()
+                Column(
+                    modifier = Modifier
+                        .padding(start = 16.dp)
+                        .fillMaxHeight()
+                        .fillMaxWidth()
                 ) {
                     Text(text = item.name, style = MaterialTheme.typography.h2)
                     Text(
@@ -162,10 +198,12 @@ fun Gallery() {
                         style = MaterialTheme.typography.body1,
                         color = MaterialTheme.colors.primaryVariant
                     )
-                    Row(modifier = Modifier
-                        .fillMaxHeight()
-                        .padding(top = if (item.name.length < 20) 40.dp else if (item.name.length < 40) 20.dp else 0.dp),
-                        verticalAlignment = Alignment.Bottom) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .padding(top = if (item.name.length < 20) 40.dp else if (item.name.length < 40) 20.dp else 0.dp),
+                        verticalAlignment = Alignment.Bottom
+                    ) {
                         Text(
                             text = item.mark.toString(),
                             textAlign = TextAlign.Center,
