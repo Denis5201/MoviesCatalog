@@ -11,6 +11,9 @@ import com.example.moviecatalog.R
 val IBMPlexSans = FontFamily(
     Font(R.font.ibm_plexsans)
 )
+val Montserrat = FontFamily(
+    Font(R.font.montserrat)
+)
 
 // Set of Material typography styles to start with
 val Typography = Typography(
@@ -43,9 +46,19 @@ val Typography = Typography(
         fontSize = 24.sp,
         color = White
     ),
+    h4 = TextStyle(
+        fontFamily = IBMPlexSans,
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.sp
+    ),
     h5 = TextStyle(
         fontFamily = IBMPlexSans,
         fontWeight = FontWeight.Medium,
         fontSize = 16.sp
+    ),
+    h6 = TextStyle(
+        fontFamily = Montserrat,
+        fontWeight = FontWeight.Medium,
+        fontSize = 12.sp
     )
 )

@@ -8,7 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.moviecatalog.screens.NavigationBar
 import com.example.moviecatalog.screens.login.LoginScreen
 import com.example.moviecatalog.screens.login.LoginViewModel
-import com.example.moviecatalog.screens.main.MainScreen
+import com.example.moviecatalog.screens.movie.MovieScreen
 import com.example.moviecatalog.screens.registration.RegistrationScreen
 import com.example.moviecatalog.screens.registration.RegistrationViewModel
 
@@ -29,7 +29,7 @@ fun Navigate() {
             NavigationBar(navController = navController)
         }
         composable(Screen.MovieScreen.route) {
-            MainScreen(navController = navController)
+            MovieScreen(navController = navController)
         }
     }
 }
