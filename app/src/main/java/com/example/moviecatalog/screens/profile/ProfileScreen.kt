@@ -1,5 +1,6 @@
 package com.example.moviecatalog.screens.profile
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -11,6 +12,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -55,7 +57,8 @@ fun ProfileLines(viewModel: ProfileViewModel) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.70f)
+            .fillMaxHeight(0.72f)
+            .padding(top = 16.dp)
             .verticalScroll(rememberScrollState())
     ) {
         Text(
@@ -119,6 +122,7 @@ fun ProfileLines(viewModel: ProfileViewModel) {
 
 @Composable
 fun ProfileButtons(navController: NavController, viewModel: ProfileViewModel) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .padding(
@@ -134,12 +138,16 @@ fun ProfileButtons(navController: NavController, viewModel: ProfileViewModel) {
             navController = navController,
             state = viewModel.save.observeAsState(false),
             click = {
-                navController.navigate(Screen.MainScreen.route) {
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        saveState = true
+                if (viewModel.correctMail.value!!) {
+                    navController.navigate(Screen.MainScreen.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
                     }
-                    launchSingleTop = true
-                    restoreState = true
+                } else {
+                    Toast.makeText(context, R.string.wrong_format_mail, Toast.LENGTH_LONG).show()
                 }
             }
         )

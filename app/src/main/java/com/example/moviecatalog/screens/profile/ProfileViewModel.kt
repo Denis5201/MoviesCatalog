@@ -1,5 +1,6 @@
 package com.example.moviecatalog.screens.profile
 
+import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,6 +11,7 @@ class ProfileViewModel : ViewModel() {
     fun setMail(value: String) {
         _mail.value = value
         maySave()
+        isCorrectMail()
     }
 
     private val _avatar = MutableLiveData("")
@@ -44,10 +46,15 @@ class ProfileViewModel : ViewModel() {
     private val _save = MutableLiveData(false)
     val save: LiveData<Boolean> = _save
 
+    private val _correctMail = MutableLiveData(false)
+    val correctMail: LiveData<Boolean> = _correctMail
+
     private fun maySave() {
         _save.value = _mail.value!!.isNotEmpty() && _name.value!!.isNotEmpty()
                 && date.value!!.isNotEmpty() && selectGender.value != 0
     }
 
-
+    private fun isCorrectMail() {
+        _correctMail.value = Patterns.EMAIL_ADDRESS.matcher(_mail.value!!).matches()
+    }
 }
