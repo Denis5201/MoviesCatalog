@@ -1,20 +1,13 @@
 package com.example.moviecatalog.screens.movie
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -25,12 +18,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.example.moviecatalog.R
 import com.example.moviecatalog.Screen
@@ -51,8 +48,9 @@ private val movieDetail = MovieDetail(
     "Райан Джонсон", 317000000, 1332539889, 16
 )
 
+
 @Composable
-fun MovieScreen(navController: NavController) {
+fun MovieScreen(navController: NavController, viewModel: MovieViewModel) {
     val lazyState = rememberLazyListState()
     val firstItemVisible by remember {
         derivedStateOf {
@@ -60,9 +58,13 @@ fun MovieScreen(navController: NavController) {
         }
     }
 
-    Column() {
-        Box(modifier = Modifier.background(MaterialTheme.colors.background).fillMaxWidth()) {
-            Row(modifier = Modifier.fillMaxWidth().height(50.dp), verticalAlignment = Alignment.CenterVertically) {
+    Column {
+        Box(modifier = Modifier
+            .background(MaterialTheme.colors.background)
+            .fillMaxWidth()) {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp), verticalAlignment = Alignment.CenterVertically) {
                 IconButton(
                     onClick = {
                         navController.navigate(Screen.MainScreen.route) {
@@ -86,11 +88,13 @@ fun MovieScreen(navController: NavController) {
                     fontFamily = MaterialTheme.typography.body1.fontFamily,
                     fontSize = 24.sp,
                     color = MaterialTheme.colors.primaryVariant,
-                    modifier = Modifier.fillMaxWidth(0.87f).alpha(
-                        if (!firstItemVisible) {
-                            1f
-                        } else 0f
-                    ),
+                    modifier = Modifier
+                        .fillMaxWidth(0.87f)
+                        .alpha(
+                            if (!firstItemVisible) {
+                                1f
+                            } else 0f
+                        ),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -153,7 +157,7 @@ fun MovieScreen(navController: NavController) {
                 Genres()
             }
             item {
-                Reviews()
+                Reviews(viewModel)
             }
         }
     }
@@ -301,7 +305,11 @@ fun Genres() {
 }
 
 @Composable
-fun Reviews() {
+fun Reviews(viewModel: MovieViewModel) {
+    val isShow = viewModel.showDialog.observeAsState(false)
+
+    if (isShow.value) ReviewDialog(viewModel, isShow)
+
     Column(modifier = Modifier
         .padding(start = 16.dp, top = 16.dp, end = 16.dp)
         .fillMaxWidth()) {
@@ -311,7 +319,12 @@ fun Reviews() {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(text = "Отзывы", style = MaterialTheme.typography.h5, color = MaterialTheme.colors.primaryVariant)
-            Image(imageVector = ImageVector.vectorResource(R.drawable.new_review), contentDescription = null)
+            Image(
+                imageVector = ImageVector.vectorResource(R.drawable.new_review),
+                contentDescription = null,
+                modifier = Modifier.clickable { viewModel.changeShowDialog(!isShow.value)
+                }
+            )
         }
 
         movieDetail.reviews.forEach { review ->
@@ -371,7 +384,7 @@ fun Reviews() {
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(text = review.createDateTime, style = MaterialTheme.typography.body1, color = MaterialTheme.colors.secondaryVariant)
-                        Row() {
+                        Row {
                             Image(
                                 bitmap = ImageBitmap.imageResource(R.drawable.edit_review), contentDescription = null,
                                 modifier = Modifier.size(24.dp)
@@ -388,5 +401,146 @@ fun Reviews() {
             }
         }
 
+    }
+}
+
+@Composable
+fun ReviewDialog(viewModel: MovieViewModel, state: State<Boolean>) {
+    val stars = viewModel.stars.observeAsState().value
+
+    Dialog(
+        onDismissRequest = { viewModel.changeShowDialog(!state.value) },
+        properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
+    ) {
+        Column(
+            modifier = Modifier
+                .size(328.dp, 410.dp)
+                .clip(MaterialTheme.shapes.large)
+                .background(colorResource(R.color.dialog))
+                .padding(start = 16.dp, top = 16.dp, end = 16.dp)
+        ) {
+            Text(
+                text = "Оставть отзыв",
+                style = MaterialTheme.typography.h1,
+                color = MaterialTheme.colors.primaryVariant,
+            )
+            Row(modifier = Modifier.padding(top = 12.dp)) {
+                for (i in 0..9) {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .padding(end = 6.dp)
+                            .clickable { viewModel.setActiveStars(i) }
+                    ) {
+                        Image(
+                            imageVector = ImageVector.vectorResource(R.drawable.background_star_svg),
+                            contentDescription = null,
+                            alpha = if (stars!![i]) 1f else 0f,
+                            modifier = Modifier.fillMaxSize(),
+                            alignment = Alignment.TopStart
+                        )
+                        Image(
+                            imageVector = if (stars[i]) {
+                                ImageVector.vectorResource(R.drawable.enable_star_svg)
+                            } else {
+                                ImageVector.vectorResource(R.drawable.disenable_star_svg)
+                            },
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(22.dp)
+                                .padding(start = 2.dp, top = 2.dp),
+                            alignment = Alignment.Center
+                        )
+                    }
+                }
+            }
+            TextField(
+                value = viewModel.textDialogReview.observeAsState("").value,
+                onValueChange = { viewModel.setTextDialogReview(it) },
+                shape = MaterialTheme.shapes.small,
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .size(296.dp, 120.dp),
+                placeholder = {
+                    Text(
+                        text = "Отзыв",
+                        color = colorResource(R.color.dialog_placeholder),
+                        fontFamily = MaterialTheme.typography.h6.fontFamily,
+                        fontSize = 14.sp
+                    )
+                },
+                textStyle = TextStyle(fontFamily = MaterialTheme.typography.h6.fontFamily, fontSize = 14.sp, color = colorResource(R.color.background)),
+                colors = TextFieldDefaults.textFieldColors(backgroundColor = MaterialTheme.colors.primaryVariant,
+                    focusedIndicatorColor = Color(0f,0f,0f,0f)
+                )
+            )
+            Row(modifier = Modifier
+                .padding(top = 16.dp)
+                .height(24.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "Анонимный отзыв",
+                    style = MaterialTheme.typography.h5,
+                    color = MaterialTheme.colors.primaryVariant
+                )
+                Checkbox(
+                    checked = viewModel.isAnonymous.observeAsState(false).value,
+                    onCheckedChange = { viewModel.changeIsAnonymous(it) },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = MaterialTheme.colors.background,
+                        uncheckedColor = MaterialTheme.colors.secondary,
+                        checkmarkColor = MaterialTheme.colors.primary
+                    )
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .padding(top = 16.dp, bottom = 16.dp)
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.Bottom
+            ) {
+                Button(
+                    onClick = { viewModel.changeShowDialog(!state.value) }, //+запрос
+                    modifier = Modifier.fillMaxWidth(),
+                    border = if (viewModel.save.observeAsState(false).value) {
+                        null
+                    } else {
+                        BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        disabledBackgroundColor = colorResource(R.color.dialog)
+                    ),
+                    enabled = viewModel.save.observeAsState(false).value
+                ) {
+                    Text(
+                        text = stringResource(R.string.save),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.body2,
+                        color = if (viewModel.save.observeAsState(false).value) {
+                            MaterialTheme.colors.primaryVariant
+                        } else {
+                            MaterialTheme.colors.primary
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.padding(4.dp))
+
+                Button(
+                    onClick = { viewModel.changeShowDialog(!state.value) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = colorResource(R.color.dialog)
+                    )
+                ) {
+                    Text(
+                        text = "Отмена",
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.body2,
+                        color = MaterialTheme.colors.primary
+                    )
+                }
+            }
+        }
     }
 }
