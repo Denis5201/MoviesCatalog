@@ -5,20 +5,30 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -29,11 +39,13 @@ import com.example.moviecatalog.domain.Review
 import com.example.moviecatalog.domain.UserShort
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
+import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 
 private val movieDetail = MovieDetail(
-    "1", "Звёздные войны", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA",
-    listOf("фантастика", "боевик", "фантастика", "боевик", "фантастика", "боевик"), listOf(Review("1", 4, "Фильм как фильм", false, "10.01.2018", UserShort("123", "Test", "https://www.pinclipart.com/picdir/middle/105-1058105_tae-kwon-do-clipart.png"))),
+    "1", "Звёдзные войны: Последние джедаи (Эпизод 8)", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA",
+    listOf("фантастика", "боевик", "фантастика", "боевик", "фантастика", "боевик"),
+    listOf(Review("1", 4, "Фильм как фильм", false, "10.01.2018", UserShort("123", "Test", "https://www.pinclipart.com/picdir/middle/105-1058105_tae-kwon-do-clipart.png")), Review("1", 4, "Ещё какой-то большооооййй отзыв. бла, бла, бла ...... .........", false, "10.01.2018", UserShort("123", "Test", "https://www.pinclipart.com/picdir/middle/105-1058105_tae-kwon-do-clipart.png"))),
     152, "«Let the Past Die»",
     "Новая история о противостоянии света и тьмы, добра и зла начинается после гибели Хана Соло. В Галактике, где Первый Орден и Сопротивление яростно сражаются друг с другом в войне, героиня Рей пробудила в себе Силу. Но что произойдет, когда она встретится с единственным оставшимся в живых рыцарем-джедаем - Люком Скайуокером?",
     "Райан Джонсон", 317000000, 1332539889, 16
@@ -41,29 +53,18 @@ private val movieDetail = MovieDetail(
 
 @Composable
 fun MovieScreen(navController: NavController) {
-    Scaffold(
-        modifier = Modifier,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                    text = movieDetail.name,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = MaterialTheme.typography.body1.fontFamily,
-                    fontSize = 24.sp,
-                    color = MaterialTheme.colors.primaryVariant
-                    )
-                    /*GlideImage(
-                        imageModel = { movieDetail.poster },
-                        previewPlaceholder = R.drawable.logo,
-                        imageOptions = ImageOptions(
-                            contentScale = ContentScale.FillHeight
-                        ),
-                        modifier = Modifier.height(250.dp)
-                    )*/
-                        },
-                navigationIcon = {
-                    IconButton(onClick = {
+    val lazyState = rememberLazyListState()
+    val firstItemVisible by remember {
+        derivedStateOf {
+            lazyState.firstVisibleItemIndex == 0
+        }
+    }
+
+    Column() {
+        Box(modifier = Modifier.background(MaterialTheme.colors.background).fillMaxWidth()) {
+            Row(modifier = Modifier.fillMaxWidth().height(50.dp), verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                    onClick = {
                         navController.navigate(Screen.MainScreen.route) {
                             popUpTo(Screen.MainScreen.route) {
                                 saveState = false
@@ -71,51 +72,98 @@ fun MovieScreen(navController: NavController) {
                             launchSingleTop = true
                             restoreState = true
                         }
-                    }) {
-                        Icon(imageVector = ImageVector.vectorResource(R.drawable.arrow_back), contentDescription = null,
-                        tint = MaterialTheme.colors.primaryVariant)
-                    }
-                },
-                backgroundColor = MaterialTheme.colors.background,
-                actions = {
-                    IconButton(onClick = { }) {
-                        Icon(imageVector = ImageVector.vectorResource(R.drawable.heart), contentDescription = null,
-                        tint = MaterialTheme.colors.primary)
-                    }
-                },
-            )
-        },
-        content = { padding ->
-         LazyColumn(
-             modifier = Modifier
-                 .padding(start = 16.dp, top = 16.dp, end = 16.dp)
-                 .fillMaxSize()
-         ) {
-             item {
-                 Text(
-                     text = movieDetail.description,
-                     style = MaterialTheme.typography.body1,
-                     color = MaterialTheme.colors.primaryVariant
-                 )
-             }
-             item {
-                 AboutMovie()
-             }
-             item {
-                 Genres()
-             }
-             item {
-                 Reviews()
-             }
-         }
-     }
-    )
-}
+                    },
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.arrow_back),
+                        contentDescription = null,
+                        tint = MaterialTheme.colors.primaryVariant
+                    )
+                }
+                Text(
+                    text = movieDetail.name,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MaterialTheme.typography.body1.fontFamily,
+                    fontSize = 24.sp,
+                    color = MaterialTheme.colors.primaryVariant,
+                    modifier = Modifier.fillMaxWidth(0.87f).alpha(
+                        if (!firstItemVisible) {
+                            1f
+                        } else 0f
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                IconButton(
+                    onClick = { },
+                    modifier = Modifier.alpha(
+                        if (!firstItemVisible) {
+                            1f
+                        } else 0f
+                    )
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.heart),
+                        contentDescription = null,
+                        tint = MaterialTheme.colors.primary,
+                    )
+                }
+            }
+        }
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth()
+            /*.nestedScroll(nestedScrollConnection)*/,
+            state = lazyState
+        ) {
+            item {
+                Box(contentAlignment = Alignment.BottomStart) {
+                    GlideImage(
+                        imageModel = { movieDetail.poster },
+                        previewPlaceholder = R.drawable.logo,
+                        imageOptions = ImageOptions(
+                            contentScale = ContentScale.FillWidth,
+                            alignment = Alignment.TopCenter
+                        ),
+                        modifier = Modifier
+                            .height(250.dp)
+                    )
+                    Text(
+                        text = movieDetail.name,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = MaterialTheme.typography.body1.fontFamily,
+                        fontSize = 36.sp,
+                        color = MaterialTheme.colors.primaryVariant,
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                    )
+                }
+
+            }
+            item {
+                Text(
+                    text = movieDetail.description,
+                    style = MaterialTheme.typography.body1,
+                    color = MaterialTheme.colors.primaryVariant,
+                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
+                )
+            }
+            item {
+                AboutMovie()
+            }
+            item {
+                Genres()
+            }
+            item {
+                Reviews()
+            }
+        }
+    }
+    }
+
 
 @Composable
 fun AboutMovie() {
     Column(modifier = Modifier
-        .padding(top = 16.dp)
+        .padding(start = 16.dp, top = 16.dp, end = 16.dp)
         .fillMaxWidth()) {
         Text(text = "О фильме", style = MaterialTheme.typography.h5, color = MaterialTheme.colors.primaryVariant)
         Row(modifier = Modifier.padding(top = 8.dp)) {
@@ -228,7 +276,7 @@ fun AboutMovie() {
 @Composable
 fun Genres() {
     Column(modifier = Modifier
-        .padding(top = 16.dp)
+        .padding(start = 16.dp, top = 16.dp, end = 16.dp)
         .fillMaxWidth()) {
         Text(text = "Жанры", style = MaterialTheme.typography.h5, color = MaterialTheme.colors.primaryVariant)
         FlowRow(modifier = Modifier.padding(top = 16.dp),
@@ -245,7 +293,7 @@ fun Genres() {
                     modifier = Modifier
                         .clip(MaterialTheme.shapes.medium)
                         .background(MaterialTheme.colors.primary)
-                        .padding(16.dp,6.dp,16.dp,6.dp)
+                        .padding(16.dp, 6.dp, 16.dp, 6.dp)
                 )
             }
         }
@@ -255,7 +303,7 @@ fun Genres() {
 @Composable
 fun Reviews() {
     Column(modifier = Modifier
-        .padding(top = 16.dp)
+        .padding(start = 16.dp, top = 16.dp, end = 16.dp)
         .fillMaxWidth()) {
         Row(modifier = Modifier
             .fillMaxWidth()
@@ -269,7 +317,9 @@ fun Reviews() {
         movieDetail.reviews.forEach { review ->
             Box(modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, MaterialTheme.colors.secondary, MaterialTheme.shapes.medium)) {
+                .padding(bottom = 8.dp)
+                .border(1.dp, MaterialTheme.colors.secondary, MaterialTheme.shapes.medium)
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -291,7 +341,7 @@ fun Reviews() {
                             )
                             Text(text = "мой отзыв", style = MaterialTheme.typography.h4, color = MaterialTheme.colors.secondaryVariant)
                         }
-                        
+
                         Box(modifier = Modifier.fillMaxWidth(),
                             contentAlignment = Alignment.TopEnd
                         ) {
@@ -305,8 +355,8 @@ fun Reviews() {
                                     .clip(MaterialTheme.shapes.large)
                                     .background(
                                         Color(
-                                            red = if (review.rating > 5) (5 / review.rating.toFloat() - review.rating.toFloat() / 38).toFloat() else (0.9 - review.rating / 150).toFloat(),
-                                            green = if (review.rating > 5) (0.9 - review.rating / 100).toFloat() else (review.rating.toFloat() / 5 - review.rating.toFloat() / 25).toFloat(),
+                                            red = if (review.rating > 5) (5 / review.rating.toFloat() - review.rating.toFloat() / 38) else (0.9 - review.rating / 150).toFloat(),
+                                            green = if (review.rating > 5) (0.9 - review.rating / 100).toFloat() else (review.rating.toFloat() / 5 - review.rating.toFloat() / 25),
                                             blue = 0f
                                         )
                                     )
