@@ -67,7 +67,7 @@ fun RegistrationLines(viewModel: RegistrationViewModel) {
                 end = 16.dp
             )
             .fillMaxWidth()
-            .fillMaxHeight(0.68f)
+            .fillMaxHeight(0.70f)
             .verticalScroll(rememberScrollState())
     ) {
         OneInputLine(
