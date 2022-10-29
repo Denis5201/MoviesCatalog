@@ -36,7 +36,7 @@ class ProfileViewModel : ViewModel() {
     }
 
     private var gender = listOf(0, 1, 2)
-    private val _selectGender = MutableLiveData(gender[0])
+    private val _selectGender = MutableLiveData(gender[2])
     val selectGender: LiveData<Int> = _selectGender
     fun setSelectGender(value: Int) {
         _selectGender.value = value
@@ -51,7 +51,7 @@ class ProfileViewModel : ViewModel() {
 
     private fun maySave() {
         _save.value = _mail.value!!.isNotEmpty() && _name.value!!.isNotEmpty()
-                && date.value!!.isNotEmpty() && selectGender.value != 0
+                && date.value!!.isNotEmpty() && selectGender.value != 2
     }
 
     private fun isCorrectMail() {

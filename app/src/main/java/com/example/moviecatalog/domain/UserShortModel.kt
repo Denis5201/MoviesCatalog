@@ -1,6 +1,6 @@
 package com.example.moviecatalog.domain
 
-data class UserShort(
+data class UserShortModel(
     val userId: String,
     val nickName: String,
     val avatar: String?

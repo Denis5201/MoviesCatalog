@@ -24,7 +24,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.moviecatalog.R
 import com.example.moviecatalog.Screen
 import com.example.moviecatalog.domain.Movie
@@ -65,7 +64,8 @@ fun Banner(navController: NavController) {
             imageModel = { movies[0].poster },
             previewPlaceholder = R.drawable.logo,
             imageOptions = ImageOptions(
-                contentScale = ContentScale.FillHeight
+                contentScale = ContentScale.FillWidth,
+                alignment = Alignment.TopCenter
             ),
             modifier = Modifier
                 .fillMaxHeight()
@@ -74,7 +74,7 @@ fun Banner(navController: NavController) {
         Button(
             onClick = {
                 navController.navigate(Screen.MovieScreen.route) {
-                    popUpTo(navController.graph.findStartDestination().id) {
+                    popUpTo(Screen.MainScreen.route) {
                         saveState = true
                     }
                     launchSingleTop = true

@@ -33,7 +33,7 @@ import com.example.moviecatalog.R
 import com.example.moviecatalog.Screen
 import com.example.moviecatalog.domain.MovieDetail
 import com.example.moviecatalog.domain.Review
-import com.example.moviecatalog.domain.UserShort
+import com.example.moviecatalog.domain.UserShortModel
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.skydoves.landscapist.ImageOptions
@@ -42,7 +42,7 @@ import com.skydoves.landscapist.glide.GlideImage
 private val movieDetail = MovieDetail(
     "1", "Звёдзные войны: Последние джедаи (Эпизод 8)", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA",
     listOf("фантастика", "боевик", "фантастика", "боевик", "фантастика", "боевик"),
-    listOf(Review("1", 4, "Фильм как фильм", false, "10.01.2018", UserShort("123", "Test", "https://www.pinclipart.com/picdir/middle/105-1058105_tae-kwon-do-clipart.png")), Review("1", 4, "Ещё какой-то большооооййй отзыв. бла, бла, бла ...... .........", false, "10.01.2018", UserShort("123", "Test", "https://www.pinclipart.com/picdir/middle/105-1058105_tae-kwon-do-clipart.png"))),
+    listOf(Review("1", 4, "Фильм как фильм", false, "10.01.2018", UserShortModel("123", "Test", "https://www.pinclipart.com/picdir/middle/105-1058105_tae-kwon-do-clipart.png")), Review("1", 4, "Ещё какой-то большооооййй отзыв. бла, бла, бла ...... .........", false, "10.01.2018", UserShortModel("123", "Test", "https://www.pinclipart.com/picdir/middle/105-1058105_tae-kwon-do-clipart.png"))),
     152, "«Let the Past Die»",
     "Новая история о противостоянии света и тьмы, добра и зла начинается после гибели Хана Соло. В Галактике, где Первый Орден и Сопротивление яростно сражаются друг с другом в войне, героиня Рей пробудила в себе Силу. Но что произойдет, когда она встретится с единственным оставшимся в живых рыцарем-джедаем - Люком Скайуокером?",
     "Райан Джонсон", 317000000, 1332539889, 16

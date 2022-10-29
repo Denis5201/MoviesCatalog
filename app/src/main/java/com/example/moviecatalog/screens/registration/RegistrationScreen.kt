@@ -112,7 +112,7 @@ fun RegistrationLines(viewModel: RegistrationViewModel) {
         Spacer(modifier = Modifier.padding(10.dp))
 
         ChoosingGender(
-            state = viewModel.selectGender.observeAsState(0),
+            state = viewModel.selectGender.observeAsState(2),
             valChange = { viewModel.setSelectGender(it) })
     }
 }

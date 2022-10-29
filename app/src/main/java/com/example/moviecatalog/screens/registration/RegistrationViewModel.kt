@@ -52,7 +52,7 @@ class RegistrationViewModel : ViewModel() {
     }
 
     private var gender = listOf(0, 1, 2)
-    private val _selectGender = MutableLiveData(gender[0])
+    private val _selectGender = MutableLiveData(gender[2])
     val selectGender: LiveData<Int> = _selectGender
     fun setSelectGender(value: Int) {
         _selectGender.value = value
@@ -72,7 +72,7 @@ class RegistrationViewModel : ViewModel() {
         _registration.value = _login.value!!.isNotEmpty() && _mail.value!!.isNotEmpty()
                 && _name.value!!.isNotEmpty() && _password.value!!.isNotEmpty()
                 && _confirmPassword.value!!.isNotEmpty() && date.value!!.isNotEmpty()
-                && _selectGender.value != 0
+                && _selectGender.value != 2
     }
 
     private fun isCorrectMail() {

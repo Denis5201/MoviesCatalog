@@ -114,7 +114,7 @@ fun ProfileLines(viewModel: ProfileViewModel) {
         )
         Spacer(modifier = Modifier.padding(4.dp))
         ChoosingGender(
-            state = viewModel.selectGender.observeAsState(0),
+            state = viewModel.selectGender.observeAsState(2),
             valChange = { viewModel.setSelectGender(it) }
         )
     }

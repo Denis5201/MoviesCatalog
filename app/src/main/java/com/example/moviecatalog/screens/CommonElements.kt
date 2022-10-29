@@ -143,11 +143,11 @@ fun ChoosingGender(state: State<Int>, valChange: (Int) -> Unit) {
             )
         }
         Button(
-            onClick = { valChange(2) },
+            onClick = { valChange(0) },
             border = BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant),
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = if (state.value != 2) {
+                backgroundColor = if (state.value != 0) {
                     MaterialTheme.colors.background
                 } else {
                     MaterialTheme.colors.primary
@@ -159,7 +159,7 @@ fun ChoosingGender(state: State<Int>, valChange: (Int) -> Unit) {
                 text = stringResource(R.string.woman),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.body2,
-                color = if (state.value == 2) {
+                color = if (state.value == 0) {
                     MaterialTheme.colors.primaryVariant
                 } else {
                     MaterialTheme.colors.primary
