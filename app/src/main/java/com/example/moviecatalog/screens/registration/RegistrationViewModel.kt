@@ -4,8 +4,12 @@ import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.moviecatalog.domain.UserRegisterModel
+import com.example.moviecatalog.repository.AuthRepository
+import kotlinx.coroutines.launch
 
-class RegistrationViewModel : ViewModel() {
+class RegistrationViewModel(val authRepository: AuthRepository) : ViewModel() {
     private val _login = MutableLiveData("")
     val login: LiveData<String> = _login
     fun setLogin(value: String) {
@@ -81,5 +85,26 @@ class RegistrationViewModel : ViewModel() {
 
     private fun isEqualPasswords() {
         _equalPasswords.value = _password.value == _confirmPassword.value
+    }
+
+    private fun getRegisterRequest() {
+        viewModelScope.launch {
+            val registerBody = UserRegisterModel(
+                    _login.value!!,
+                    _name.value!!,
+                    _password.value!!,
+                    _mail.value!!,
+                    _date.value!!,
+                    _selectGender.value!!
+            )
+            authRepository.register(registerBody)
+                .collect() { result ->
+                    result.onSuccess {
+
+                    }.onFailure {
+
+                    }
+                }
+        }
     }
 }
