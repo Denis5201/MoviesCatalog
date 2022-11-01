@@ -89,16 +89,9 @@ fun Buttons(navController: NavController, viewModel: LoginViewModel) {
     ) {
         FirstButton(
             name = stringResource(R.string.enter),
-            navController = navController,
             state = viewModel.entrance.observeAsState(false),
             click = {
-                navController.navigate(Screen.MainScreen.route) {
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        saveState = true
-                    }
-                    launchSingleTop = true
-                    restoreState = true
-                }
+                viewModel.getLoginRequest()
             }
         )
 
@@ -109,5 +102,15 @@ fun Buttons(navController: NavController, viewModel: LoginViewModel) {
             navController = navController,
             route = Screen.RegistrationScreen.route
         )
+
+        if (viewModel.mayGoToMain.observeAsState(false).value) {
+            navController.navigate(Screen.MainScreen.route) {
+                popUpTo(navController.graph.findStartDestination().id) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
     }
 }

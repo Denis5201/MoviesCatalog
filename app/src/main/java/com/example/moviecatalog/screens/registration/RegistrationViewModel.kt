@@ -8,8 +8,13 @@ import androidx.lifecycle.viewModelScope
 import com.example.moviecatalog.domain.UserRegisterModel
 import com.example.moviecatalog.repository.AuthRepository
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
+import java.util.*
 
-class RegistrationViewModel(val authRepository: AuthRepository) : ViewModel() {
+class RegistrationViewModel : ViewModel() {
+    private val authRepository = AuthRepository()
+
     private val _login = MutableLiveData("")
     val login: LiveData<String> = _login
     fun setLogin(value: String) {
@@ -48,10 +53,14 @@ class RegistrationViewModel(val authRepository: AuthRepository) : ViewModel() {
         isEqualPasswords()
     }
 
+    private val dateToFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+    private var dateForServer:String = ""
+
     private val _date = MutableLiveData("")
     val date: LiveData<String> = _date
-    fun setDate(value: String) {
-        _date.value = value
+    fun setDate(value: Date) {
+        _date.value = dateToFormat.format(value)
+        dateForServer = DateTimeFormatter.ISO_INSTANT.format(value.toInstant()).toString()
         mayRegister()
     }
 
@@ -72,6 +81,9 @@ class RegistrationViewModel(val authRepository: AuthRepository) : ViewModel() {
     private val _equalPasswords = MutableLiveData(false)
     val equalPasswords: LiveData<Boolean> = _equalPasswords
 
+    private val _mayGoToMain = MutableLiveData(false)
+    val mayGoToMain: LiveData<Boolean> = _mayGoToMain
+
     private fun mayRegister() {
         _registration.value = _login.value!!.isNotEmpty() && _mail.value!!.isNotEmpty()
                 && _name.value!!.isNotEmpty() && _password.value!!.isNotEmpty()
@@ -87,20 +99,20 @@ class RegistrationViewModel(val authRepository: AuthRepository) : ViewModel() {
         _equalPasswords.value = _password.value == _confirmPassword.value
     }
 
-    private fun getRegisterRequest() {
+    fun getRegisterRequest() {
         viewModelScope.launch {
             val registerBody = UserRegisterModel(
                     _login.value!!,
                     _name.value!!,
                     _password.value!!,
                     _mail.value!!,
-                    _date.value!!,
+                    dateForServer,
                     _selectGender.value!!
             )
             authRepository.register(registerBody)
                 .collect() { result ->
                     result.onSuccess {
-
+                        _mayGoToMain.value = true
                     }.onFailure {
 
                     }

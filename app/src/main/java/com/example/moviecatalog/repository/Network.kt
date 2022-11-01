@@ -1,6 +1,7 @@
 package com.example.moviecatalog.repository
 
 import com.example.moviecatalog.api.AuthApi
+import com.example.moviecatalog.api.UserApi
 import com.example.moviecatalog.domain.Token
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
@@ -42,4 +43,5 @@ object Network {
     var token: Token? = null
 
     fun getAuthApi(): AuthApi = retrofit.create(AuthApi::class.java)
+    fun getUserApi(): UserApi = retrofit.create(UserApi::class.java)
 }

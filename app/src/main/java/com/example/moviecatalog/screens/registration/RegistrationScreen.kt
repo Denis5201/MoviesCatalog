@@ -134,18 +134,11 @@ fun RegButtons(navController: NavController, viewModel: RegistrationViewModel) {
     ) {
         FirstButton(
             name = stringResource(R.string.set_registration),
-            navController = navController,
             state = viewModel.registration.observeAsState(false),
             click = {
                 if (viewModel.correctMail.value!!) {
                     if (viewModel.equalPasswords.value!!) {
-                        navController.navigate(Screen.MainScreen.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        viewModel.getRegisterRequest()
                     } else {
                         Toast.makeText(context, R.string.passwords_not_equal, Toast.LENGTH_LONG).show()
                     }
@@ -162,5 +155,15 @@ fun RegButtons(navController: NavController, viewModel: RegistrationViewModel) {
             navController = navController,
             route = Screen.LoginScreen.route
         )
+    }
+
+    if (viewModel.mayGoToMain.observeAsState(false).value) {
+        navController.navigate(Screen.MainScreen.route) {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
     }
 }

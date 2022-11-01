@@ -27,6 +27,11 @@ fun ProfileScreen(
     navController: NavController,
     viewModel: ProfileViewModel
 ) {
+    if (viewModel.loading.observeAsState(true).value) {
+        viewModel.getProfileRequest()
+        viewModel.setLoading(false)
+    }
+
     Column(modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)) {
         Header()
         ProfileLines(viewModel)
@@ -135,7 +140,6 @@ fun ProfileButtons(navController: NavController, viewModel: ProfileViewModel) {
     ) {
         FirstButton(
             name = stringResource(R.string.save),
-            navController = navController,
             state = viewModel.save.observeAsState(false),
             click = {
                 if (viewModel.correctMail.value!!) {

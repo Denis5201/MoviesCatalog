@@ -63,7 +63,7 @@ fun OneInputLine(
 @Composable
 fun DateDialog(
     state: State<String>,
-    valChange: (String) -> Unit,
+    valChange: (Date) -> Unit,
 ) {
     val calendar = Calendar.getInstance()
     val year = calendar.get(Calendar.YEAR)
@@ -74,13 +74,15 @@ fun DateDialog(
     val datePickerDialog = DatePickerDialog(
         LocalContext.current,
         { _: DatePicker, year: Int, month: Int, dayOfMount: Int ->
-            valChange("$dayOfMount.${month + 1}.$year")
+            val date = Calendar.getInstance()
+            date.set(year, month, dayOfMount)
+            valChange(date.time)
         }, year, month, day
     )
 
     OutlinedTextField(
         value = state.value,
-        onValueChange = { valChange(it) },
+        onValueChange = {  },
         trailingIcon = {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.date_icon),
@@ -172,7 +174,6 @@ fun ChoosingGender(state: State<Int>, valChange: (Int) -> Unit) {
 @Composable
 fun FirstButton(
     name: String,
-    navController: NavController,
     state: State<Boolean>,
     click: () -> Unit
 ) {
