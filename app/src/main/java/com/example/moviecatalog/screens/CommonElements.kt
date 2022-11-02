@@ -5,8 +5,10 @@ import android.icu.util.Calendar
 import android.widget.DatePicker
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -63,7 +65,7 @@ fun OneInputLine(
 @Composable
 fun DateDialog(
     state: State<String>,
-    valChange: (String) -> Unit,
+    valChange: (Date) -> Unit,
 ) {
     val calendar = Calendar.getInstance()
     val year = calendar.get(Calendar.YEAR)
@@ -74,13 +76,15 @@ fun DateDialog(
     val datePickerDialog = DatePickerDialog(
         LocalContext.current,
         { _: DatePicker, year: Int, month: Int, dayOfMount: Int ->
-            valChange("$dayOfMount.${month + 1}.$year")
+            val date = Calendar.getInstance()
+            date.set(year, month, dayOfMount)
+            valChange(date.time)
         }, year, month, day
     )
 
     OutlinedTextField(
         value = state.value,
-        onValueChange = { valChange(it) },
+        onValueChange = {  },
         trailingIcon = {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.date_icon),
@@ -143,11 +147,11 @@ fun ChoosingGender(state: State<Int>, valChange: (Int) -> Unit) {
             )
         }
         Button(
-            onClick = { valChange(2) },
+            onClick = { valChange(0) },
             border = BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant),
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = if (state.value != 2) {
+                backgroundColor = if (state.value != 0) {
                     MaterialTheme.colors.background
                 } else {
                     MaterialTheme.colors.primary
@@ -159,7 +163,7 @@ fun ChoosingGender(state: State<Int>, valChange: (Int) -> Unit) {
                 text = stringResource(R.string.woman),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.body2,
-                color = if (state.value == 2) {
+                color = if (state.value == 0) {
                     MaterialTheme.colors.primaryVariant
                 } else {
                     MaterialTheme.colors.primary
@@ -172,7 +176,6 @@ fun ChoosingGender(state: State<Int>, valChange: (Int) -> Unit) {
 @Composable
 fun FirstButton(
     name: String,
-    navController: NavController,
     state: State<Boolean>,
     click: () -> Unit
 ) {
@@ -229,4 +232,17 @@ fun SecondButton(
             color = MaterialTheme.colors.primary
         )
     }
+}
+
+@Composable
+fun LoadingProgress() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        CircularProgressIndicator(color = MaterialTheme.colors.primary)
+    }
+
 }

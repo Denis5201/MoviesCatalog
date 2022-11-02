@@ -9,6 +9,7 @@ import com.example.moviecatalog.screens.NavigationBar
 import com.example.moviecatalog.screens.login.LoginScreen
 import com.example.moviecatalog.screens.login.LoginViewModel
 import com.example.moviecatalog.screens.movie.MovieScreen
+import com.example.moviecatalog.screens.movie.MovieViewModel
 import com.example.moviecatalog.screens.registration.RegistrationScreen
 import com.example.moviecatalog.screens.registration.RegistrationViewModel
 
@@ -29,7 +30,8 @@ fun Navigate() {
             NavigationBar(navController = navController)
         }
         composable(Screen.MovieScreen.route) {
-            MovieScreen(navController = navController)
+            val movieViewModel = viewModel<MovieViewModel>()
+            MovieScreen(navController = navController, movieViewModel)
         }
     }
 }

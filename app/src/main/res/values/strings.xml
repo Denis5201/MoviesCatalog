@@ -22,4 +22,21 @@
     <string name="woman">Женщина</string>
     <string name="wrong_format_mail">Неверный формат почты!</string>
     <string name="passwords_not_equal">Поля \"Пароль\" и \"Подтвердите пароль\" не совпадают!</string>
+    <string name="about_movie">О фильме</string>
+    <string name="year">Год</string>
+    <string name="country">Страна</string>
+    <string name="time">Время</string>
+    <string name="tagline">Слоган</string>
+    <string name="director">Режиссёр</string>
+    <string name="budget">Бюджет</string>
+    <string name="fees">Сборы в мире</string>
+    <string name="age_limit">Возраст</string>
+    <string name="genres">Жанры</string>
+    <string name="reviews">Отзывы</string>
+    <string name="anonymous_user">Анонимный пользователь</string>
+    <string name="my_review">мой отзыв</string>
+    <string name="send_review">Оставть отзыв</string>
+    <string name="review">Отзыв</string>
+    <string name="anonymous_review">Анонимный отзыв</string>
+    <string name="cancel">Отмена</string>
 </resources>

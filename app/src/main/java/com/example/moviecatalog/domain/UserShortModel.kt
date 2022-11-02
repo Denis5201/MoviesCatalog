@@ -1,6 +1,9 @@
 package com.example.moviecatalog.domain
 
-data class UserShort(
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class UserShortModel(
     val userId: String,
     val nickName: String,
     val avatar: String?

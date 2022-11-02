@@ -14,4 +14,6 @@
     <color name="bottomBar">#1C1A19</color>
     <color name="deleteFavour">#D6DDE3</color>
     <color name="about">#B3B3B3</color>
+    <color name="dialog">#282828</color>
+    <color name="dialog_placeholder">#7F7F7F</color>
 </resources>
