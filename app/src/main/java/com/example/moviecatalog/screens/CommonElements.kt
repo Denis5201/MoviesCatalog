@@ -5,8 +5,10 @@ import android.icu.util.Calendar
 import android.widget.DatePicker
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -230,4 +232,17 @@ fun SecondButton(
             color = MaterialTheme.colors.primary
         )
     }
+}
+
+@Composable
+fun LoadingProgress() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        CircularProgressIndicator(color = MaterialTheme.colors.primary)
+    }
+
 }

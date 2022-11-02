@@ -42,7 +42,7 @@ class LoginViewModel : ViewModel() {
                 _password.value!!
             )
             authRepository.login(loginBody)
-                .collect() { result ->
+                .collect { result ->
                     result.onSuccess {
                         _mayGoToMain.value = true
                     }.onFailure {

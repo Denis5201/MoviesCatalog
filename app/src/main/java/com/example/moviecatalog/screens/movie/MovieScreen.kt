@@ -34,6 +34,8 @@ import com.example.moviecatalog.Screen
 import com.example.moviecatalog.domain.MovieDetail
 import com.example.moviecatalog.domain.Review
 import com.example.moviecatalog.domain.UserShortModel
+import com.example.moviecatalog.screens.calculateGreenByMark
+import com.example.moviecatalog.screens.calculateRedByMark
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.skydoves.landscapist.ImageOptions
@@ -59,12 +61,16 @@ fun MovieScreen(navController: NavController, viewModel: MovieViewModel) {
     }
 
     Column {
-        Box(modifier = Modifier
-            .background(MaterialTheme.colors.background)
-            .fillMaxWidth()) {
-            Row(modifier = Modifier
+        Box(
+            modifier = Modifier
+                .background(MaterialTheme.colors.background)
                 .fillMaxWidth()
-                .height(50.dp), verticalAlignment = Alignment.CenterVertically) {
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp), verticalAlignment = Alignment.CenterVertically
+            ) {
                 IconButton(
                     onClick = {
                         navController.navigate(Screen.MainScreen.route) {
@@ -161,18 +167,24 @@ fun MovieScreen(navController: NavController, viewModel: MovieViewModel) {
             }
         }
     }
-    }
+}
 
 
 @Composable
 fun AboutMovie() {
-    Column(modifier = Modifier
-        .padding(start = 16.dp, top = 16.dp, end = 16.dp)
-        .fillMaxWidth()) {
-        Text(text = "О фильме", style = MaterialTheme.typography.h5, color = MaterialTheme.colors.primaryVariant)
+    Column(
+        modifier = Modifier
+            .padding(start = 16.dp, top = 16.dp, end = 16.dp)
+            .fillMaxWidth()
+    ) {
+        Text(
+            text = stringResource(R.string.about_movie),
+            style = MaterialTheme.typography.h5,
+            color = MaterialTheme.colors.primaryVariant
+        )
         Row(modifier = Modifier.padding(top = 8.dp)) {
             Text(
-                text = "Год",
+                text = stringResource(R.string.year),
                 style = MaterialTheme.typography.h6,
                 color = colorResource(R.color.about),
                 modifier = Modifier.width(100.dp)
@@ -185,7 +197,7 @@ fun AboutMovie() {
         }
         Row(modifier = Modifier.padding(top = 8.dp)) {
             Text(
-                text = "Страна",
+                text = stringResource(R.string.country),
                 style = MaterialTheme.typography.h6,
                 color = colorResource(R.color.about),
                 modifier = Modifier.width(100.dp)
@@ -198,7 +210,7 @@ fun AboutMovie() {
         }
         Row(modifier = Modifier.padding(top = 8.dp)) {
             Text(
-                text = "Время",
+                text = stringResource(R.string.time),
                 style = MaterialTheme.typography.h6,
                 color = colorResource(R.color.about),
                 modifier = Modifier.width(100.dp)
@@ -211,7 +223,7 @@ fun AboutMovie() {
         }
         Row(modifier = Modifier.padding(top = 8.dp)) {
             Text(
-                text = "Слоган",
+                text = stringResource(R.string.tagline),
                 style = MaterialTheme.typography.h6,
                 color = colorResource(R.color.about),
                 modifier = Modifier.width(100.dp)
@@ -224,7 +236,7 @@ fun AboutMovie() {
         }
         Row(modifier = Modifier.padding(top = 8.dp)) {
             Text(
-                text = "Режиссёр",
+                text = stringResource(R.string.director),
                 style = MaterialTheme.typography.h6,
                 color = colorResource(R.color.about),
                 modifier = Modifier.width(100.dp)
@@ -237,7 +249,7 @@ fun AboutMovie() {
         }
         Row(modifier = Modifier.padding(top = 8.dp)) {
             Text(
-                text = "Бюджет",
+                text = stringResource(R.string.budget),
                 style = MaterialTheme.typography.h6,
                 color = colorResource(R.color.about),
                 modifier = Modifier.width(100.dp)
@@ -250,7 +262,7 @@ fun AboutMovie() {
         }
         Row(modifier = Modifier.padding(top = 8.dp)) {
             Text(
-                text = "Сборы в мире",
+                text = stringResource(R.string.fees),
                 style = MaterialTheme.typography.h6,
                 color = colorResource(R.color.about),
                 modifier = Modifier.width(100.dp)
@@ -263,7 +275,7 @@ fun AboutMovie() {
         }
         Row(modifier = Modifier.padding(top = 8.dp)) {
             Text(
-                text = "Возраст",
+                text = stringResource(R.string.age_limit),
                 style = MaterialTheme.typography.h6,
                 color = colorResource(R.color.about),
                 modifier = Modifier.width(100.dp)
@@ -279,11 +291,18 @@ fun AboutMovie() {
 
 @Composable
 fun Genres() {
-    Column(modifier = Modifier
-        .padding(start = 16.dp, top = 16.dp, end = 16.dp)
-        .fillMaxWidth()) {
-        Text(text = "Жанры", style = MaterialTheme.typography.h5, color = MaterialTheme.colors.primaryVariant)
-        FlowRow(modifier = Modifier.padding(top = 16.dp),
+    Column(
+        modifier = Modifier
+            .padding(start = 16.dp, top = 16.dp, end = 16.dp)
+            .fillMaxWidth()
+    ) {
+        Text(
+            text = stringResource(R.string.genres),
+            style = MaterialTheme.typography.h5,
+            color = MaterialTheme.colors.primaryVariant
+        )
+        FlowRow(
+            modifier = Modifier.padding(top = 16.dp),
             mainAxisAlignment = FlowMainAxisAlignment.Start,
             mainAxisSpacing = 8.dp,
             crossAxisSpacing = 8.dp
@@ -310,28 +329,37 @@ fun Reviews(viewModel: MovieViewModel) {
 
     if (isShow.value) ReviewDialog(viewModel, isShow)
 
-    Column(modifier = Modifier
-        .padding(start = 16.dp, top = 16.dp, end = 16.dp)
-        .fillMaxWidth()) {
-        Row(modifier = Modifier
+    Column(
+        modifier = Modifier
+            .padding(start = 16.dp, top = 16.dp, end = 16.dp)
             .fillMaxWidth()
-            .padding(bottom = 12.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = "Отзывы", style = MaterialTheme.typography.h5, color = MaterialTheme.colors.primaryVariant)
+            Text(
+                text = stringResource(R.string.reviews),
+                style = MaterialTheme.typography.h5,
+                color = MaterialTheme.colors.primaryVariant
+            )
             Image(
                 imageVector = ImageVector.vectorResource(R.drawable.new_review),
                 contentDescription = null,
-                modifier = Modifier.clickable { viewModel.changeShowDialog(!isShow.value)
+                modifier = Modifier.clickable {
+                    viewModel.changeShowDialog(!isShow.value)
                 }
             )
         }
 
         movieDetail.reviews.forEach { review ->
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp)
-                .border(1.dp, MaterialTheme.colors.secondary, MaterialTheme.shapes.medium)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+                    .border(1.dp, MaterialTheme.colors.secondary, MaterialTheme.shapes.medium)
             ) {
                 Column(
                     modifier = Modifier
@@ -348,14 +376,19 @@ fun Reviews(viewModel: MovieViewModel) {
                         )
                         Column(modifier = Modifier.padding(start = 16.dp)) {
                             Text(
-                                text = if (review.isAnonymous) "Анонимный пользователь" else review.author.nickName,
+                                text = if (review.isAnonymous) stringResource(R.string.anonymous_user) else review.author.nickName,
                                 style = MaterialTheme.typography.h5,
                                 color = MaterialTheme.colors.primaryVariant
                             )
-                            Text(text = "мой отзыв", style = MaterialTheme.typography.h4, color = MaterialTheme.colors.secondaryVariant)
+                            Text(
+                                text = stringResource(R.string.my_review),
+                                style = MaterialTheme.typography.h4,
+                                color = MaterialTheme.colors.secondaryVariant
+                            )
                         }
 
-                        Box(modifier = Modifier.fillMaxWidth(),
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
                             contentAlignment = Alignment.TopEnd
                         ) {
                             Text(
@@ -368,8 +401,8 @@ fun Reviews(viewModel: MovieViewModel) {
                                     .clip(MaterialTheme.shapes.large)
                                     .background(
                                         Color(
-                                            red = if (review.rating > 5) (5 / review.rating.toFloat() - review.rating.toFloat() / 38) else (0.9 - review.rating / 150).toFloat(),
-                                            green = if (review.rating > 5) (0.9 - review.rating / 100).toFloat() else (review.rating.toFloat() / 5 - review.rating.toFloat() / 25),
+                                            red = calculateRedByMark(review.rating.toFloat()),
+                                            green = calculateGreenByMark(review.rating.toFloat()),
                                             blue = 0f
                                         )
                                     )
@@ -377,21 +410,32 @@ fun Reviews(viewModel: MovieViewModel) {
                         }
                     }
                     Spacer(modifier = Modifier.padding(4.dp))
-                    Text(text = review.reviewText, style = MaterialTheme.typography.body1, color = MaterialTheme.colors.primaryVariant)
-                    Row(modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 4.dp),
+                    Text(
+                        text = review.reviewText,
+                        style = MaterialTheme.typography.body1,
+                        color = MaterialTheme.colors.primaryVariant
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(text = review.createDateTime, style = MaterialTheme.typography.body1, color = MaterialTheme.colors.secondaryVariant)
+                        Text(
+                            text = review.createDateTime,
+                            style = MaterialTheme.typography.body1,
+                            color = MaterialTheme.colors.secondaryVariant
+                        )
                         Row {
                             Image(
-                                bitmap = ImageBitmap.imageResource(R.drawable.edit_review), contentDescription = null,
+                                bitmap = ImageBitmap.imageResource(R.drawable.edit_review),
+                                contentDescription = null,
                                 modifier = Modifier.size(24.dp)
                             )
                             Spacer(modifier = Modifier.padding(4.dp))
                             Image(
-                                bitmap = ImageBitmap.imageResource(R.drawable.delete_review), contentDescription = null,
+                                bitmap = ImageBitmap.imageResource(R.drawable.delete_review),
+                                contentDescription = null,
                                 modifier = Modifier.size(24.dp)
                             )
                         }
@@ -420,7 +464,7 @@ fun ReviewDialog(viewModel: MovieViewModel, state: State<Boolean>) {
                 .padding(start = 16.dp, top = 16.dp, end = 16.dp)
         ) {
             Text(
-                text = "Оставть отзыв",
+                text = stringResource(R.string.send_review),
                 style = MaterialTheme.typography.h1,
                 color = MaterialTheme.colors.primaryVariant,
             )
@@ -463,22 +507,29 @@ fun ReviewDialog(viewModel: MovieViewModel, state: State<Boolean>) {
                     .size(296.dp, 120.dp),
                 placeholder = {
                     Text(
-                        text = "Отзыв",
+                        text = stringResource(R.string.review),
                         color = colorResource(R.color.dialog_placeholder),
                         fontFamily = MaterialTheme.typography.h6.fontFamily,
                         fontSize = 14.sp
                     )
                 },
-                textStyle = TextStyle(fontFamily = MaterialTheme.typography.h6.fontFamily, fontSize = 14.sp, color = colorResource(R.color.background)),
-                colors = TextFieldDefaults.textFieldColors(backgroundColor = MaterialTheme.colors.primaryVariant,
-                    focusedIndicatorColor = Color(0f,0f,0f,0f)
+                textStyle = TextStyle(
+                    fontFamily = MaterialTheme.typography.h6.fontFamily,
+                    fontSize = 14.sp,
+                    color = colorResource(R.color.background)
+                ),
+                colors = TextFieldDefaults.textFieldColors(
+                    backgroundColor = MaterialTheme.colors.primaryVariant,
+                    focusedIndicatorColor = Color(0f, 0f, 0f, 0f)
                 )
             )
-            Row(modifier = Modifier
-                .padding(top = 16.dp)
-                .height(24.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .height(24.dp), verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    text = "Анонимный отзыв",
+                    text = stringResource(R.string.anonymous_review),
                     style = MaterialTheme.typography.h5,
                     color = MaterialTheme.colors.primaryVariant
                 )
@@ -534,7 +585,7 @@ fun ReviewDialog(viewModel: MovieViewModel, state: State<Boolean>) {
                     )
                 ) {
                     Text(
-                        text = "Отмена",
+                        text = stringResource(R.string.cancel),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.body2,
                         color = MaterialTheme.colors.primary

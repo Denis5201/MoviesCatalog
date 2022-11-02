@@ -80,7 +80,7 @@ class ProfileViewModel : ViewModel() {
     fun getProfileRequest() {
         viewModelScope.launch {
             userRepository.profile()
-                .collect() { result ->
+                .collect { result ->
                     result.onSuccess {
                         _mail.value = it.email
                         _avatar.value = it.avatarLink ?: ""

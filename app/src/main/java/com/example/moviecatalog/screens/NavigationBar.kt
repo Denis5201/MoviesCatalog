@@ -18,6 +18,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.moviecatalog.R
 import com.example.moviecatalog.screens.main.MainScreen
+import com.example.moviecatalog.screens.main.MainViewModel
 import com.example.moviecatalog.screens.profile.ProfileScreen
 import com.example.moviecatalog.screens.profile.ProfileViewModel
 
@@ -58,7 +59,10 @@ fun NavigationBar(navController: NavController) {
             startDestination = BottomNavItem.Main.route,
             Modifier.padding(innerPadding)
         ) {
-            composable(BottomNavItem.Main.route) { MainScreen(navController) }
+            composable(BottomNavItem.Main.route) {
+                val mainViewModel = viewModel<MainViewModel>()
+                MainScreen(navController, mainViewModel)
+            }
             composable(BottomNavItem.Profile.route) {
                 val profileViewModel = viewModel<ProfileViewModel>()
                 ProfileScreen(navController, profileViewModel)

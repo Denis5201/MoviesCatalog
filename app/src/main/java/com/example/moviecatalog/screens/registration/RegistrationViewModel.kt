@@ -110,7 +110,7 @@ class RegistrationViewModel : ViewModel() {
                     _selectGender.value!!
             )
             authRepository.register(registerBody)
-                .collect() { result ->
+                .collect { result ->
                     result.onSuccess {
                         _mayGoToMain.value = true
                     }.onFailure {

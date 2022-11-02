@@ -12,9 +12,11 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -27,15 +29,24 @@ import androidx.navigation.NavController
 import com.example.moviecatalog.R
 import com.example.moviecatalog.Screen
 import com.example.moviecatalog.domain.Movie
+import com.example.moviecatalog.screens.LoadingProgress
+import com.example.moviecatalog.screens.calculateGreenByMark
+import com.example.moviecatalog.screens.calculateRatingOffset
+import com.example.moviecatalog.screens.calculateRedByMark
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
+import kotlin.math.roundToInt
 
 
 @Composable
-fun MainScreen(navController: NavController) {
-    Column {
-        Banner(navController)
-        Gallery(navController)
+fun MainScreen(navController: NavController, viewModel: MainViewModel) {
+    if (viewModel.state.value.isLoading)
+        LoadingProgress()
+    else {
+        Column {
+            Banner(navController, viewModel.state)
+            Gallery(navController, viewModel)
+        }
     }
 }
 
@@ -46,14 +57,10 @@ var movies = listOf(
     Movie("4", "ЗВ", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA", listOf("фантастика", "боевик"), 4.2),
     Movie("5", "ЗВ", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA", listOf("фантастика", "боевик"), 5.0),
     Movie("6", "ЗВ", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA", listOf("фантастика", "боевик"), 5.5),
-    Movie("7", "ЗВ", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA", listOf("фантастика", "боевик"), 6.2),
-    Movie("8", "ЗВ", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA", listOf("фантастика", "боевик"), 7.5),
-    Movie("9", "ЗВ", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA", listOf("фантастика", "боевик"), 9.0),
-    Movie("10", "ЗВ", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA", listOf("фантастика", "боевик"), 10.0)
 )
 
 @Composable
-fun Banner(navController: NavController) {
+fun Banner(navController: NavController, state: MutableState<MainScreenState>) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -61,7 +68,7 @@ fun Banner(navController: NavController) {
         contentAlignment = Alignment.BottomCenter
     ) {
         GlideImage(
-            imageModel = { movies[0].poster },
+            imageModel = { state.value.items[0].poster },
             previewPlaceholder = R.drawable.logo,
             imageOptions = ImageOptions(
                 contentScale = ContentScale.FillWidth,
@@ -70,6 +77,19 @@ fun Banner(navController: NavController) {
             modifier = Modifier
                 .fillMaxHeight()
                 .fillMaxWidth()
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.05f)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            Color.Transparent,
+                            MaterialTheme.colors.background
+                        )
+                    )
+                )
         )
         Button(
             onClick = {
@@ -137,7 +157,9 @@ fun Favourites(navController: NavController) {
 }
 
 @Composable
-fun Gallery(navController: NavController) {
+fun Gallery(navController: NavController, viewModel: MainViewModel) {
+    val state = viewModel.state
+
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
@@ -153,78 +175,103 @@ fun Gallery(navController: NavController) {
             )
             Spacer(modifier = Modifier.padding(8.dp))
         }
-        items(movies) { item ->
-            Row(modifier = Modifier
-                .heightIn(min = 144.dp)
-                .clickable {
-                    navController.navigate(Screen.MovieScreen.route) {
-                        popUpTo(Screen.MainScreen.route) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
+        items(state.value.items.size) { i ->
+            if (i != 0) {
+                if (i >= state.value.items.size - 1 && !state.value.endReached && !state.value.isMakingRequest) {
+                    viewModel.loadPage()
                 }
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(100.dp, 144.dp)
+                var mark = 0f
+                if (state.value.items[i].reviews != null && state.value.items[i].reviews!!.isNotEmpty()) {
+                    for (review in state.value.items[i].reviews!!)
+                        mark += review.rating
+                    mark = (mark / state.value.items[i].reviews!!.size * 10).roundToInt() / 10f
+                }
+                var listGenres = ""
+
+                Row(modifier = Modifier
+                    .heightIn(min = 144.dp)
+                    .clickable {
+                        navController.navigate(Screen.MovieScreen.route) {
+                            popUpTo(Screen.MainScreen.route) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
                 ) {
-                    GlideImage(
-                        imageModel = { item.poster },
-                        previewPlaceholder = R.drawable.logo,
-                        imageOptions = ImageOptions(
-                            contentScale = ContentScale.FillHeight
-                        ),
+                    Box(
                         modifier = Modifier
+                            .size(100.dp, 144.dp)
+                    ) {
+                        GlideImage(
+                            imageModel = { state.value.items[i].poster },
+                            previewPlaceholder = R.drawable.logo,
+                            imageOptions = ImageOptions(
+                                contentScale = ContentScale.FillHeight
+                            ),
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth()
+                        )
+                    }
+                    Column(
+                        modifier = Modifier
+                            .padding(start = 16.dp)
                             .fillMaxHeight()
                             .fillMaxWidth()
-                    )
-                }
-                Column(
-                    modifier = Modifier
-                        .padding(start = 16.dp)
-                        .fillMaxHeight()
-                        .fillMaxWidth()
-                ) {
-                    Text(text = item.name, style = MaterialTheme.typography.h2)
-                    Text(
-                        text = "${item.year} • ${item.country}",
-                        style = MaterialTheme.typography.body1,
-                        color = MaterialTheme.colors.primaryVariant
-                    )
-                    Text(
-                        text = item.genres.toString().drop(1).dropLast(1),
-                        style = MaterialTheme.typography.body1,
-                        color = MaterialTheme.colors.primaryVariant
-                    )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .padding(top = if (item.name.length < 20) 40.dp else if (item.name.length < 40) 20.dp else 0.dp),
-                        verticalAlignment = Alignment.Bottom
                     ) {
+                        Text(text = state.value.items[i].name, style = MaterialTheme.typography.h2)
                         Text(
-                            text = item.mark.toString(),
-                            textAlign = TextAlign.Center,
+                            text = "${state.value.items[i].year} • ${state.value.items[i].country}",
                             style = MaterialTheme.typography.body1,
-                            color = MaterialTheme.colors.primaryVariant,
-                            modifier = Modifier
-                                .size(56.dp, 28.dp)
-                                .clip(MaterialTheme.shapes.large)
-                                .background(
-                                    Color(
-                                        red = if (item.mark > 5) (5 / item.mark - item.mark / 38).toFloat() else (0.9 - item.mark / 150).toFloat(),
-                                        green = if (item.mark > 5) (0.9 - item.mark / 100).toFloat() else (item.mark / 5 - item.mark / 25).toFloat(),
-                                        blue = 0f
-                                    )
-                                )
+                            color = MaterialTheme.colors.primaryVariant
                         )
+                        if (state.value.items[i].genres != null) {
+                            listGenres = state.value.items[i].genres!![0].name
+                            for (genres in 1 until state.value.items[i].genres!!.size)
+                                listGenres += ", ${state.value.items[i].genres!![genres].name}"
+                            Text(
+                                text = listGenres,
+                                style = MaterialTheme.typography.body1,
+                                color = MaterialTheme.colors.primaryVariant
+                            )
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(
+                                    top = calculateRatingOffset(
+                                        state.value.items[i].name.length,
+                                        listGenres.length
+                                    )
+                                ),
+                            verticalAlignment = Alignment.Bottom
+                        ) {
+                            Text(
+                                text = if (mark != 0.0f) mark.toString() else "-",
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.body1,
+                                color = MaterialTheme.colors.primaryVariant,
+                                modifier = Modifier
+                                    .size(56.dp, 28.dp)
+                                    .clip(MaterialTheme.shapes.large)
+                                    .background(
+                                        Color(
+                                            red = calculateRedByMark(mark),
+                                            green = calculateGreenByMark(mark),
+                                            blue = 0f
+                                        )
+                                    )
+                            )
+                        }
                     }
                 }
             }
-
+        }
+        item {
+            if (state.value.isMakingRequest)
+                LoadingProgress()
         }
     }
-
 }

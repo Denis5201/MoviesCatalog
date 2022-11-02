@@ -1,6 +1,8 @@
 package com.example.moviecatalog.repository
 
 import com.example.moviecatalog.api.AuthApi
+import com.example.moviecatalog.api.FavoriteMoviesApi
+import com.example.moviecatalog.api.MovieApi
 import com.example.moviecatalog.api.UserApi
 import com.example.moviecatalog.domain.Token
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -29,13 +31,12 @@ object Network {
     }
 
     private fun getRetrofit(): Retrofit {
-        val retrofit = Retrofit.Builder()
+
+        return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .client(getHttpClient())
             .build()
-
-        return retrofit
     }
 
     private val retrofit = getRetrofit()
@@ -44,4 +45,6 @@ object Network {
 
     fun getAuthApi(): AuthApi = retrofit.create(AuthApi::class.java)
     fun getUserApi(): UserApi = retrofit.create(UserApi::class.java)
+    fun getMovieApi(): MovieApi = retrofit.create(MovieApi::class.java)
+    fun getFavoriteMoviesApi(): FavoriteMoviesApi = retrofit.create(FavoriteMoviesApi::class.java)
 }
