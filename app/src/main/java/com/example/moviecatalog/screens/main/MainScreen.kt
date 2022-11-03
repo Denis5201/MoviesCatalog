@@ -68,7 +68,7 @@ fun Banner(navController: NavController, state: MutableState<MainScreenState>) {
         contentAlignment = Alignment.BottomCenter
     ) {
         GlideImage(
-            imageModel = { state.value.items[0].poster },
+            imageModel = { state.value.items.getOrNull(0)?.poster },
             previewPlaceholder = R.drawable.logo,
             imageOptions = ImageOptions(
                 contentScale = ContentScale.FillWidth,

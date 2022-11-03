@@ -104,6 +104,7 @@ fun Buttons(navController: NavController, viewModel: LoginViewModel) {
         )
 
         if (viewModel.mayGoToMain.observeAsState(false).value) {
+            viewModel.setMayGoToMain(false)
             navController.navigate(Screen.MainScreen.route) {
                 popUpTo(navController.graph.findStartDestination().id) {
                     saveState = true

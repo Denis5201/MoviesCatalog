@@ -30,6 +30,9 @@ class LoginViewModel : ViewModel() {
 
     private val _mayGoToMain = MutableLiveData(false)
     val mayGoToMain: LiveData<Boolean> = _mayGoToMain
+    fun setMayGoToMain(value: Boolean) {
+        _mayGoToMain.value = value
+    }
 
     private fun mayEnter() {
         _entrance.value = _name.value!!.isNotEmpty() && _password.value!!.isNotEmpty()
