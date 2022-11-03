@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.moviecatalog.domain.ProfileModel
 import com.example.moviecatalog.repository.UserRepository
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -14,6 +15,8 @@ import java.util.*
 
 class ProfileViewModel : ViewModel() {
     private val userRepository = UserRepository()
+    val status = MutableLiveData(ProfileScreenStatus())
+    private var profile: ProfileModel? = null
 
     private val _mail = MutableLiveData("")
     val mail: LiveData<String> = _mail
@@ -62,12 +65,6 @@ class ProfileViewModel : ViewModel() {
     private val _correctMail = MutableLiveData(false)
     val correctMail: LiveData<Boolean> = _correctMail
 
-    private val _loading = MutableLiveData(false)
-    val loading: LiveData<Boolean> = _loading
-    fun setLoading(value: Boolean) {
-        _loading.value = value
-    }
-
     private fun maySave() {
         _save.value = _mail.value!!.isNotEmpty() && _name.value!!.isNotEmpty()
                 && date.value!!.isNotEmpty() && selectGender.value != 2
@@ -77,23 +74,71 @@ class ProfileViewModel : ViewModel() {
         _correctMail.value = Patterns.EMAIL_ADDRESS.matcher(_mail.value!!).matches()
     }
 
-    fun getProfileRequest() {
+    init {
+        status.value = status.value?.copy(
+            isLoading = true
+        )
+        getProfileRequest()
+    }
+
+    private fun getProfileRequest() {
         viewModelScope.launch {
-            userRepository.profile()
+            userRepository.getProfile()
                 .collect { result ->
                     result.onSuccess {
+                        profile = it
                         _mail.value = it.email
                         _avatar.value = it.avatarLink ?: ""
                         _name.value = it.name
 
                         if (it.birthDate.last() != 'Z') it.birthDate += 'Z'
                         _date.value = dateToFormat.format(Date.from(Instant.parse(it.birthDate)))
+                        dateForServer = it.birthDate
 
                         _selectGender.value = it.gender
+                        setDefaultStatus()
                     }.onFailure {
-
+                        status.value = status.value?.copy(
+                            isError = true,
+                            errorMassage = it.message
+                        )
                     }
                 }
         }
+    }
+
+    fun putProfile() {
+        viewModelScope.launch {
+            val profileBody = ProfileModel(
+                profile!!.id,
+                profile!!.nickName,
+                _mail.value!!,
+                _avatar.value,
+                _name.value!!,
+                dateForServer,
+                _selectGender.value!!
+            )
+            userRepository.putProfile(profileBody)
+                .collect { result ->
+                    result.onSuccess {
+                        status.value = status.value?.copy(
+                            isSaveSuccess = true
+                        )
+                    }.onFailure {
+                        status.value = status.value?.copy(
+                            isError = true,
+                            errorMassage = it.message
+                        )
+                    }
+                }
+        }
+    }
+
+    fun setDefaultStatus() {
+        status.value = status.value?.copy(
+            isLoading = false,
+            isError = false,
+            isSaveSuccess = false
+        )
     }
 }

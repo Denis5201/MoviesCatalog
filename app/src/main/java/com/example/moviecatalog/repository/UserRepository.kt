@@ -11,12 +11,22 @@ import kotlinx.coroutines.flow.flowOn
 class UserRepository {
     private val api: UserApi = Network.getUserApi()
 
-    suspend fun profile(): Flow<Result<ProfileModel>> = flow{
+    suspend fun getProfile(): Flow<Result<ProfileModel>> = flow{
         try {
-            val profile = api.profile()
+            val profile = api.getProfile()
             emit(Result.success(profile))
         } catch (e: Exception) {
-            Log.e("OPS Profile", e.message.toString())
+            Log.e("OPS getProfile", e.message.toString())
+            emit(Result.failure(e))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    suspend fun putProfile(body: ProfileModel): Flow<Result<Unit>> = flow{
+        try {
+            api.putProfile(body)
+            emit(Result.success(Unit))
+        } catch (e: Exception) {
+            Log.e("OPS putProfile", e.message.toString())
             emit(Result.failure(e))
         }
     }.flowOn(Dispatchers.IO)

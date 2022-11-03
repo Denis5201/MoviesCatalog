@@ -3,8 +3,16 @@ package com.example.moviecatalog.screens.movie
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.moviecatalog.repository.MovieRepository
+import kotlinx.coroutines.launch
 
 class MovieViewModel: ViewModel() {
+    private val movieRepository = MovieRepository()
+
+    private var movieId = ""
+    val status = MutableLiveData(MovieScreenStatus())
+
     private val _stars = MutableLiveData(mutableListOf(false, false, false, false, false, false, false, false, false, false))
     val stars: LiveData<MutableList<Boolean>> = _stars
     fun setActiveStars(index: Int) {
@@ -40,5 +48,27 @@ class MovieViewModel: ViewModel() {
 
     private fun maySave() {
         _save.value = _stars.value!![0] != false
+    }
+
+    fun initialScreen(id: String) {
+        status.value = status.value!!.copy(isStart = false)
+        movieId = id
+        getDetailsRequest()
+    }
+
+    private fun getDetailsRequest() {
+        viewModelScope.launch {
+            movieRepository.details(movieId)
+                .collect { result ->
+                    result.onSuccess {
+                       status.value = status.value!!.copy(
+                           isLoading = false,
+                           movieDetail = it
+                       )
+                    }.onFailure {
+
+                    }
+                }
+        }
     }
 }

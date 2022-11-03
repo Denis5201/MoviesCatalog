@@ -2,7 +2,7 @@ package com.example.moviecatalog.screens.main
 
 import com.example.moviecatalog.domain.MovieElementModel
 
-data class MainScreenState(
+data class MainScreenStatus(
     val isLoading: Boolean = false,
     var isMakingRequest: Boolean = false,
     val items: List<MovieElementModel> = emptyList(),

@@ -40,11 +40,11 @@ import kotlin.math.roundToInt
 
 @Composable
 fun MainScreen(navController: NavController, viewModel: MainViewModel) {
-    if (viewModel.state.value.isLoading)
+    if (viewModel.status.value.isLoading)
         LoadingProgress()
     else {
         Column {
-            Banner(navController, viewModel.state)
+            Banner(navController, viewModel.status)
             Gallery(navController, viewModel)
         }
     }
@@ -60,7 +60,7 @@ var movies = listOf(
 )
 
 @Composable
-fun Banner(navController: NavController, state: MutableState<MainScreenState>) {
+fun Banner(navController: NavController, state: MutableState<MainScreenStatus>) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -93,7 +93,7 @@ fun Banner(navController: NavController, state: MutableState<MainScreenState>) {
         )
         Button(
             onClick = {
-                navController.navigate(Screen.MovieScreen.route) {
+                navController.navigate("${Screen.MovieScreen.route}/${state.value.items.getOrNull(0)?.id}") {
                     popUpTo(Screen.MainScreen.route) {
                         saveState = true
                     }
@@ -109,7 +109,9 @@ fun Banner(navController: NavController, state: MutableState<MainScreenState>) {
 }
 
 @Composable
-fun Favourites(navController: NavController) {
+fun Favourites(navController: NavController, viewModel: MainViewModel) {
+    val state = viewModel.status
+
     Text(
         text = stringResource(R.string.favour),
         style = MaterialTheme.typography.h1,
@@ -117,7 +119,7 @@ fun Favourites(navController: NavController) {
     )
     Spacer(modifier = Modifier.padding(8.dp))
     LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        items(movies) { item ->
+        items(state.value.favorite) { item ->
             Box(
                 contentAlignment = Alignment.TopEnd,
                 modifier = Modifier.size(120.dp, 172.dp)
@@ -132,7 +134,7 @@ fun Favourites(navController: NavController) {
                         .fillMaxHeight()
                         .fillMaxWidth()
                         .clickable {
-                            navController.navigate(Screen.MovieScreen.route) {
+                            navController.navigate("${Screen.MovieScreen.route}/${item.id}") {
                                 popUpTo(Screen.MainScreen.route) {
                                     saveState = true
                                 }
@@ -158,14 +160,16 @@ fun Favourites(navController: NavController) {
 
 @Composable
 fun Gallery(navController: NavController, viewModel: MainViewModel) {
-    val state = viewModel.state
+    val state = viewModel.status
 
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
     ) {
         item {
-            Favourites(navController)
+            if (state.value.favorite.isNotEmpty()) {
+                Favourites(navController, viewModel)
+            }
         }
         item {
             Text(
@@ -191,7 +195,7 @@ fun Gallery(navController: NavController, viewModel: MainViewModel) {
                 Row(modifier = Modifier
                     .heightIn(min = 144.dp)
                     .clickable {
-                        navController.navigate(Screen.MovieScreen.route) {
+                        navController.navigate("${Screen.MovieScreen.route}/${state.value.items[i].id}") {
                             popUpTo(Screen.MainScreen.route) {
                                 saveState = true
                             }

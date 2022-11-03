@@ -16,7 +16,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.moviecatalog.R
 import com.example.moviecatalog.Screen
 import com.example.moviecatalog.screens.*
@@ -27,15 +26,19 @@ fun ProfileScreen(
     navController: NavController,
     viewModel: ProfileViewModel
 ) {
-    if (viewModel.loading.observeAsState(true).value) {
-        viewModel.getProfileRequest()
-        viewModel.setLoading(false)
+    if (viewModel.status.observeAsState().value?.isLoading == true) {
+        LoadingProgress()
+    } else {
+        Column(modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)) {
+            Header()
+            ProfileLines(viewModel)
+            ProfileButtons(navController, viewModel)
+        }
     }
 
-    Column(modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)) {
-        Header()
-        ProfileLines(viewModel)
-        ProfileButtons(navController, viewModel)
+    if (viewModel.status.observeAsState().value?.isError == true) {
+        Toast.makeText(LocalContext.current, viewModel.status.value!!.errorMassage, Toast.LENGTH_LONG).show()
+        viewModel.setDefaultStatus()
     }
 }
 
@@ -143,13 +146,7 @@ fun ProfileButtons(navController: NavController, viewModel: ProfileViewModel) {
             state = viewModel.save.observeAsState(false),
             click = {
                 if (viewModel.correctMail.value!!) {
-                    navController.navigate(Screen.MainScreen.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
+                    viewModel.putProfile()
                 } else {
                     Toast.makeText(context, R.string.wrong_format_mail, Toast.LENGTH_LONG).show()
                 }
@@ -164,5 +161,10 @@ fun ProfileButtons(navController: NavController, viewModel: ProfileViewModel) {
             route = Screen.LoginScreen.route,
             isSave = false
         )
+    }
+
+    if (viewModel.status.observeAsState().value!!.isSaveSuccess) {
+        Toast.makeText(context, R.string.save_success, Toast.LENGTH_LONG).show()
+        viewModel.setDefaultStatus()
     }
 }

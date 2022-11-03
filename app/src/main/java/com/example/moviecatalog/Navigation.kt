@@ -29,9 +29,9 @@ fun Navigate() {
         composable(Screen.MainScreen.route) {
             NavigationBar(navController = navController)
         }
-        composable(Screen.MovieScreen.route) {
+        composable("${Screen.MovieScreen.route}/{movieId}") {
             val movieViewModel = viewModel<MovieViewModel>()
-            MovieScreen(navController = navController, movieViewModel)
+            MovieScreen(navController = navController, movieViewModel, it.arguments?.getString("movieId"))
         }
     }
 }

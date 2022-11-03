@@ -11,10 +11,10 @@ class MainViewModel : ViewModel() {
     private val movieRepository = MovieRepository()
     private val favoriteMoviesRepository = FavoriteMoviesRepository()
 
-    var state = mutableStateOf(MainScreenState())
+    var status = mutableStateOf(MainScreenStatus())
 
     init {
-        state.value = state.value.copy(
+        status.value = status.value.copy(
             isLoading = true
         )
         loadPage()
@@ -23,31 +23,31 @@ class MainViewModel : ViewModel() {
 
     fun loadPage() {
         viewModelScope.launch {
-            if (!state.value.isMakingRequest) {
-                state.value = state.value.copy(
+            if (!status.value.isMakingRequest) {
+                status.value = status.value.copy(
                     isMakingRequest = true
                 )
 
-                movieRepository.page(state.value.nextPage)
+                movieRepository.page(status.value.nextPage)
                     .collect { result ->
                         result.onSuccess {
-                            state.value = state.value.copy(
-                                items = state.value.items + it.movies!!,
-                                nextPage = state.value.nextPage + 1,
+                            status.value = status.value.copy(
+                                items = status.value.items + it.movies!!,
+                                nextPage = status.value.nextPage + 1,
                                 endReached = it.movies.isEmpty(),
-                                favorite = state.value.favorite
+                                favorite = status.value.favorite
                             )
                         }.onFailure {
-                            state.value = state.value.copy(
+                            status.value = status.value.copy(
                                 isError = true,
                                 errorMessage = it.message,
-                                nextPage = state.value.nextPage,
-                                items = state.value.items,
-                                favorite = state.value.favorite
+                                nextPage = status.value.nextPage,
+                                items = status.value.items,
+                                favorite = status.value.favorite
                             )
                         }
                     }
-                state.value = state.value.copy(
+                status.value = status.value.copy(
                     isMakingRequest = false
                 )
             }
@@ -59,20 +59,20 @@ class MainViewModel : ViewModel() {
             favoriteMoviesRepository.getFavorites()
                 .collect { result ->
                     result.onSuccess {
-                        state.value = state.value.copy(
+                        status.value = status.value.copy(
                             isError = true,
-                            errorMessage = state.value.errorMessage,
-                            nextPage = state.value.nextPage,
-                            items = state.value.items,
+                            errorMessage = status.value.errorMessage,
+                            nextPage = status.value.nextPage,
+                            items = status.value.items,
                             favorite = it.movies ?: emptyList(),
                             isLoading = false
                         )
                     }.onFailure {
-                        state.value = state.value.copy(
+                        status.value = status.value.copy(
                             isError = true,
                             errorMessage = it.message,
-                            nextPage = state.value.nextPage,
-                            items = state.value.items
+                            nextPage = status.value.nextPage,
+                            items = status.value.items
                         )
                     }
                 }

@@ -34,6 +34,7 @@ import com.example.moviecatalog.Screen
 import com.example.moviecatalog.domain.MovieDetail
 import com.example.moviecatalog.domain.Review
 import com.example.moviecatalog.domain.UserShortModel
+import com.example.moviecatalog.screens.LoadingProgress
 import com.example.moviecatalog.screens.calculateGreenByMark
 import com.example.moviecatalog.screens.calculateRedByMark
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
@@ -52,13 +53,26 @@ private val movieDetail = MovieDetail(
 
 
 @Composable
-fun MovieScreen(navController: NavController, viewModel: MovieViewModel) {
+fun MovieScreen(navController: NavController, viewModel: MovieViewModel, movieId: String?) {
+    if (viewModel.status.observeAsState().value?.isLoading == true) {
+        LoadingProgress()
+    } else {
+        MovieScreenBody(navController, viewModel)
+    }
+    if (viewModel.status.observeAsState().value?.isStart == true) {
+        viewModel.initialScreen(movieId!!)
+    }
+}
+
+@Composable
+fun MovieScreenBody(navController: NavController, viewModel: MovieViewModel) {
     val lazyState = rememberLazyListState()
     val firstItemVisible by remember {
         derivedStateOf {
             lazyState.firstVisibleItemIndex == 0
         }
     }
+    val status = viewModel.status.observeAsState()
 
     Column {
         Box(
@@ -89,7 +103,7 @@ fun MovieScreen(navController: NavController, viewModel: MovieViewModel) {
                     )
                 }
                 Text(
-                    text = movieDetail.name,
+                    text = status.value!!.movieDetail!!.name,
                     fontWeight = FontWeight.Bold,
                     fontFamily = MaterialTheme.typography.body1.fontFamily,
                     fontSize = 24.sp,
@@ -128,7 +142,7 @@ fun MovieScreen(navController: NavController, viewModel: MovieViewModel) {
             item {
                 Box(contentAlignment = Alignment.BottomStart) {
                     GlideImage(
-                        imageModel = { movieDetail.poster },
+                        imageModel = { status.value!!.movieDetail!!.poster},
                         previewPlaceholder = R.drawable.logo,
                         imageOptions = ImageOptions(
                             contentScale = ContentScale.FillWidth,
@@ -138,7 +152,7 @@ fun MovieScreen(navController: NavController, viewModel: MovieViewModel) {
                             .height(250.dp)
                     )
                     Text(
-                        text = movieDetail.name,
+                        text = status.value!!.movieDetail!!.name,
                         fontWeight = FontWeight.Bold,
                         fontFamily = MaterialTheme.typography.body1.fontFamily,
                         fontSize = 36.sp,
@@ -150,17 +164,17 @@ fun MovieScreen(navController: NavController, viewModel: MovieViewModel) {
             }
             item {
                 Text(
-                    text = movieDetail.description,
+                    text = if (status.value!!.movieDetail!!.description != null) status.value!!.movieDetail!!.description!! else "Описания нет",
                     style = MaterialTheme.typography.body1,
                     color = MaterialTheme.colors.primaryVariant,
                     modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
                 )
             }
             item {
-                AboutMovie()
+                AboutMovie(viewModel)
             }
             item {
-                Genres()
+                Genres(viewModel)
             }
             item {
                 Reviews(viewModel)
@@ -169,9 +183,10 @@ fun MovieScreen(navController: NavController, viewModel: MovieViewModel) {
     }
 }
 
-
 @Composable
-fun AboutMovie() {
+fun AboutMovie(viewModel: MovieViewModel) {
+    val movieDetails = viewModel.status.observeAsState().value!!.movieDetail
+
     Column(
         modifier = Modifier
             .padding(start = 16.dp, top = 16.dp, end = 16.dp)
@@ -190,7 +205,7 @@ fun AboutMovie() {
                 modifier = Modifier.width(100.dp)
             )
             Text(
-                text = "${movieDetail.year}",
+                text = "${movieDetails!!.year}",
                 style = MaterialTheme.typography.h6,
                 color = MaterialTheme.colors.primaryVariant
             )
@@ -203,7 +218,7 @@ fun AboutMovie() {
                 modifier = Modifier.width(100.dp)
             )
             Text(
-                text = movieDetail.country,
+                text = if (movieDetails!!.country != null) movieDetails.country!! else "-",
                 style = MaterialTheme.typography.h6,
                 color = MaterialTheme.colors.primaryVariant
             )
@@ -216,7 +231,7 @@ fun AboutMovie() {
                 modifier = Modifier.width(100.dp)
             )
             Text(
-                text = "${movieDetail.time} мин",
+                text = "${movieDetails!!.time} мин",
                 style = MaterialTheme.typography.h6,
                 color = MaterialTheme.colors.primaryVariant
             )
@@ -229,7 +244,7 @@ fun AboutMovie() {
                 modifier = Modifier.width(100.dp)
             )
             Text(
-                text = movieDetail.tagline,
+                text = if (movieDetails!!.tagline != null) movieDetails.tagline!! else "-",
                 style = MaterialTheme.typography.h6,
                 color = MaterialTheme.colors.primaryVariant
             )
@@ -242,7 +257,7 @@ fun AboutMovie() {
                 modifier = Modifier.width(100.dp)
             )
             Text(
-                text = movieDetail.director,
+                text = if (movieDetails!!.director != null) movieDetails.director!! else "-",
                 style = MaterialTheme.typography.h6,
                 color = MaterialTheme.colors.primaryVariant
             )
@@ -255,7 +270,7 @@ fun AboutMovie() {
                 modifier = Modifier.width(100.dp)
             )
             Text(
-                text = "$${movieDetail.budget}",
+                text = "$${movieDetails!!.budget}",
                 style = MaterialTheme.typography.h6,
                 color = MaterialTheme.colors.primaryVariant
             )
@@ -268,7 +283,7 @@ fun AboutMovie() {
                 modifier = Modifier.width(100.dp)
             )
             Text(
-                text = "$${movieDetail.fees}",
+                text = "$${movieDetails!!.fees}",
                 style = MaterialTheme.typography.h6,
                 color = MaterialTheme.colors.primaryVariant
             )
@@ -281,7 +296,7 @@ fun AboutMovie() {
                 modifier = Modifier.width(100.dp)
             )
             Text(
-                text = "${movieDetail.ageLimit}+",
+                text = "${movieDetails!!.ageLimit}+",
                 style = MaterialTheme.typography.h6,
                 color = MaterialTheme.colors.primaryVariant
             )
@@ -290,7 +305,9 @@ fun AboutMovie() {
 }
 
 @Composable
-fun Genres() {
+fun Genres(viewModel: MovieViewModel) {
+    val movieDetails = viewModel.status.observeAsState().value!!.movieDetail
+
     Column(
         modifier = Modifier
             .padding(start = 16.dp, top = 16.dp, end = 16.dp)
@@ -307,9 +324,9 @@ fun Genres() {
             mainAxisSpacing = 8.dp,
             crossAxisSpacing = 8.dp
         ) {
-            movieDetail.genres.forEach {
+            movieDetails!!.genres?.forEach {
                 Text(
-                    text = it,
+                    text = it.name,
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.body1,
                     color = MaterialTheme.colors.primaryVariant,
