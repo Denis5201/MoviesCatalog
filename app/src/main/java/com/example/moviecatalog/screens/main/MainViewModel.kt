@@ -1,10 +1,14 @@
 package com.example.moviecatalog.screens.main
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.moviecatalog.domain.MovieElementModel
 import com.example.moviecatalog.repository.FavoriteMoviesRepository
 import com.example.moviecatalog.repository.MovieRepository
+import com.example.moviecatalog.screens.FavoriteUpdateParameter
 import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
@@ -12,6 +16,8 @@ class MainViewModel : ViewModel() {
     private val favoriteMoviesRepository = FavoriteMoviesRepository()
 
     var status = mutableStateOf(MainScreenStatus())
+    private val _favorites = MutableLiveData<MutableList<MovieElementModel>>()
+    val favorites: LiveData<MutableList<MovieElementModel>> = _favorites
 
     init {
         status.value = status.value.copy(
@@ -34,16 +40,12 @@ class MainViewModel : ViewModel() {
                             status.value = status.value.copy(
                                 items = status.value.items + it.movies!!,
                                 nextPage = status.value.nextPage + 1,
-                                endReached = it.movies.isEmpty(),
-                                favorite = status.value.favorite
+                                endReached = it.movies.isEmpty()
                             )
                         }.onFailure {
                             status.value = status.value.copy(
                                 isError = true,
                                 errorMessage = it.message,
-                                nextPage = status.value.nextPage,
-                                items = status.value.items,
-                                favorite = status.value.favorite
                             )
                         }
                     }
@@ -60,22 +62,39 @@ class MainViewModel : ViewModel() {
                 .collect { result ->
                     result.onSuccess {
                         status.value = status.value.copy(
-                            isError = true,
-                            errorMessage = status.value.errorMessage,
-                            nextPage = status.value.nextPage,
-                            items = status.value.items,
-                            favorite = it.movies ?: emptyList(),
                             isLoading = false
                         )
+                        _favorites.value = (it.movies ?: mutableListOf()) as MutableList<MovieElementModel>
                     }.onFailure {
                         status.value = status.value.copy(
                             isError = true,
-                            errorMessage = it.message,
-                            nextPage = status.value.nextPage,
-                            items = status.value.items
+                            errorMessage = it.message
                         )
                     }
                 }
         }
+    }
+
+    fun deleteFavorite(movieId: String) {
+        viewModelScope.launch {
+            favoriteMoviesRepository.deleteFavorites(movieId)
+                .collect { result ->
+                    result.onSuccess {
+                        val temp = _favorites.value!!.toMutableList()
+                        temp.removeIf { it.id == movieId }
+                        _favorites.value = temp
+                    }.onFailure {
+                        status.value = status.value.copy(
+                            isError = true,
+                            errorMessage = it.message
+                        )
+                    }
+                }
+        }
+    }
+
+    fun changeFavoriteFromMovieScreen() {
+        FavoriteUpdateParameter.isFavouriteChange = false
+        getFavorites()
     }
 }

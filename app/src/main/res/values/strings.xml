@@ -40,4 +40,5 @@
     <string name="anonymous_review">Анонимный отзыв</string>
     <string name="cancel">Отмена</string>
     <string name="save_success">Данные сохранены</string>
+    <string name="token">Token</string>
 </resources>

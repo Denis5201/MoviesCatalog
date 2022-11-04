@@ -10,5 +10,4 @@ data class MainScreenStatus(
     val errorMessage: String? = null,
     val endReached: Boolean = false,
     val nextPage: Int = 1,
-    val favorite: List<MovieElementModel> = emptyList()
 )

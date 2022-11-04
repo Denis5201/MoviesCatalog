@@ -20,4 +20,24 @@ class FavoriteMoviesRepository {
             emit(Result.failure(e))
         }
     }.flowOn(Dispatchers.IO)
+
+    suspend fun addFavorites(movieId: String): Flow<Result<Unit>> = flow {
+        try {
+            api.addFavorites(movieId)
+            emit(Result.success(Unit))
+        } catch (e: Exception) {
+            Log.e("OPS addFavorites", e.message.toString())
+            emit(Result.failure(e))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    suspend fun deleteFavorites(movieId: String): Flow<Result<Unit>> = flow {
+        try {
+            api.deleteFavorites(movieId)
+            emit(Result.success(Unit))
+        } catch (e: Exception) {
+            Log.e("OPS deleteFavorites", e.message.toString())
+            emit(Result.failure(e))
+        }
+    }.flowOn(Dispatchers.IO)
 }

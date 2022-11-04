@@ -103,7 +103,7 @@ fun Buttons(navController: NavController, viewModel: LoginViewModel) {
             route = Screen.RegistrationScreen.route
         )
 
-        if (viewModel.mayGoToMain.observeAsState(false).value) {
+        if (viewModel.mayGoToMain.observeAsState().value == true) {
             viewModel.setMayGoToMain(false)
             navController.navigate(Screen.MainScreen.route) {
                 popUpTo(navController.graph.findStartDestination().id) {

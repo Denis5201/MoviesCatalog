@@ -6,13 +6,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,11 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.moviecatalog.R
 import com.example.moviecatalog.Screen
-import com.example.moviecatalog.domain.Movie
-import com.example.moviecatalog.screens.LoadingProgress
-import com.example.moviecatalog.screens.calculateGreenByMark
-import com.example.moviecatalog.screens.calculateRatingOffset
-import com.example.moviecatalog.screens.calculateRedByMark
+import com.example.moviecatalog.screens.*
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 import kotlin.math.roundToInt
@@ -48,19 +44,13 @@ fun MainScreen(navController: NavController, viewModel: MainViewModel) {
             Gallery(navController, viewModel)
         }
     }
+    if (FavoriteUpdateParameter.isFavouriteChange) {
+        viewModel.changeFavoriteFromMovieScreen()
+    }
 }
 
-var movies = listOf(
-    Movie("1", "Звёдзные войны: Последние джедаи (Эпизод 8)", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA", listOf("фантастика", "боевик"), 1.0),
-    Movie("2", "ЗВ", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA", listOf("фантастика", "боевик"), 2.0),
-    Movie("3", "ЗВ", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA", listOf("фантастика", "боевик"), 3.0),
-    Movie("4", "ЗВ", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA", listOf("фантастика", "боевик"), 4.2),
-    Movie("5", "ЗВ", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA", listOf("фантастика", "боевик"), 5.0),
-    Movie("6", "ЗВ", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA", listOf("фантастика", "боевик"), 5.5),
-)
-
 @Composable
-fun Banner(navController: NavController, state: MutableState<MainScreenStatus>) {
+fun Banner(navController: NavController, status: MutableState<MainScreenStatus>) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -68,7 +58,7 @@ fun Banner(navController: NavController, state: MutableState<MainScreenStatus>) 
         contentAlignment = Alignment.BottomCenter
     ) {
         GlideImage(
-            imageModel = { state.value.items.getOrNull(0)?.poster },
+            imageModel = { status.value.items.getOrNull(0)?.poster },
             previewPlaceholder = R.drawable.logo,
             imageOptions = ImageOptions(
                 contentScale = ContentScale.FillWidth,
@@ -93,7 +83,7 @@ fun Banner(navController: NavController, state: MutableState<MainScreenStatus>) 
         )
         Button(
             onClick = {
-                navController.navigate("${Screen.MovieScreen.route}/${state.value.items.getOrNull(0)?.id}") {
+                navController.navigate("${Screen.MovieScreen.route}/${status.value.items.getOrNull(0)?.id}") {
                     popUpTo(Screen.MainScreen.route) {
                         saveState = true
                     }
@@ -110,7 +100,7 @@ fun Banner(navController: NavController, state: MutableState<MainScreenStatus>) 
 
 @Composable
 fun Favourites(navController: NavController, viewModel: MainViewModel) {
-    val state = viewModel.status
+    val favorites = viewModel.favorites.observeAsState()
 
     Text(
         text = stringResource(R.string.favour),
@@ -119,13 +109,13 @@ fun Favourites(navController: NavController, viewModel: MainViewModel) {
     )
     Spacer(modifier = Modifier.padding(8.dp))
     LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        items(state.value.favorite) { item ->
+        items(favorites.value!!.size) { i ->
             Box(
                 contentAlignment = Alignment.TopEnd,
                 modifier = Modifier.size(120.dp, 172.dp)
             ) {
                 GlideImage(
-                    imageModel = { item.poster },
+                    imageModel = { favorites.value!![i].poster },
                     previewPlaceholder = R.drawable.logo,
                     imageOptions = ImageOptions(
                         contentScale = ContentScale.FillHeight
@@ -134,7 +124,7 @@ fun Favourites(navController: NavController, viewModel: MainViewModel) {
                         .fillMaxHeight()
                         .fillMaxWidth()
                         .clickable {
-                            navController.navigate("${Screen.MovieScreen.route}/${item.id}") {
+                            navController.navigate("${Screen.MovieScreen.route}/${favorites.value!![i].id}") {
                                 popUpTo(Screen.MainScreen.route) {
                                     saveState = true
                                 }
@@ -144,9 +134,11 @@ fun Favourites(navController: NavController, viewModel: MainViewModel) {
                         }
                 )
                 Button(
-                    onClick = { },
+                    onClick = {
+                              viewModel.deleteFavorite(favorites.value!![i].id)
+                    },
                     modifier = Modifier
-                        .size(12.dp, 12.dp)
+                        .size(20.dp, 20.dp)
                         .padding(top = 2.dp, end = 2.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(R.color.deleteFavour)),
                     contentPadding = PaddingValues(0.dp)
@@ -161,13 +153,14 @@ fun Favourites(navController: NavController, viewModel: MainViewModel) {
 @Composable
 fun Gallery(navController: NavController, viewModel: MainViewModel) {
     val state = viewModel.status
+    val favorites = viewModel.favorites.observeAsState()
 
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
     ) {
         item {
-            if (state.value.favorite.isNotEmpty()) {
+            if (favorites.value!!.isNotEmpty()) {
                 Favourites(navController, viewModel)
             }
         }

@@ -1,5 +1,6 @@
 package com.example.moviecatalog.screens.movie
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,9 +32,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.example.moviecatalog.R
 import com.example.moviecatalog.Screen
-import com.example.moviecatalog.domain.MovieDetail
-import com.example.moviecatalog.domain.Review
-import com.example.moviecatalog.domain.UserShortModel
+import com.example.moviecatalog.screens.FavoriteUpdateParameter
 import com.example.moviecatalog.screens.LoadingProgress
 import com.example.moviecatalog.screens.calculateGreenByMark
 import com.example.moviecatalog.screens.calculateRedByMark
@@ -41,16 +40,6 @@ import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
-
-private val movieDetail = MovieDetail(
-    "1", "Звёдзные войны: Последние джедаи (Эпизод 8)", "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e9bc098b-43fd-446a-a3dd-9b37b8e2a8ec/300x450", 2017, "USA",
-    listOf("фантастика", "боевик", "фантастика", "боевик", "фантастика", "боевик"),
-    listOf(Review("1", 4, "Фильм как фильм", false, "10.01.2018", UserShortModel("123", "Test", "https://www.pinclipart.com/picdir/middle/105-1058105_tae-kwon-do-clipart.png")), Review("1", 4, "Ещё какой-то большооооййй отзыв. бла, бла, бла ...... .........", false, "10.01.2018", UserShortModel("123", "Test", "https://www.pinclipart.com/picdir/middle/105-1058105_tae-kwon-do-clipart.png"))),
-    152, "«Let the Past Die»",
-    "Новая история о противостоянии света и тьмы, добра и зла начинается после гибели Хана Соло. В Галактике, где Первый Орден и Сопротивление яростно сражаются друг с другом в войне, героиня Рей пробудила в себе Силу. Но что произойдет, когда она встретится с единственным оставшимся в живых рыцарем-джедаем - Люком Скайуокером?",
-    "Райан Джонсон", 317000000, 1332539889, 16
-)
-
 
 @Composable
 fun MovieScreen(navController: NavController, viewModel: MovieViewModel, movieId: String?) {
@@ -61,6 +50,12 @@ fun MovieScreen(navController: NavController, viewModel: MovieViewModel, movieId
     }
     if (viewModel.status.observeAsState().value?.isStart == true) {
         viewModel.initialScreen(movieId!!)
+    }
+
+    BackHandler {
+        if (viewModel.favoriteInStart.value != viewModel.status.value!!.isFavorite)
+            FavoriteUpdateParameter.isFavouriteChange = true
+        navController.navigateUp()
     }
 }
 
@@ -88,6 +83,8 @@ fun MovieScreenBody(navController: NavController, viewModel: MovieViewModel) {
                 IconButton(
                     onClick = {
                         navController.navigate(Screen.MainScreen.route) {
+                            if (viewModel.favoriteInStart.value != viewModel.status.value!!.isFavorite)
+                                FavoriteUpdateParameter.isFavouriteChange = true
                             popUpTo(Screen.MainScreen.route) {
                                 saveState = false
                             }
@@ -119,15 +116,24 @@ fun MovieScreenBody(navController: NavController, viewModel: MovieViewModel) {
                     overflow = TextOverflow.Ellipsis
                 )
                 IconButton(
-                    onClick = { },
+                    onClick = {
+                              viewModel.changeFavorite()
+                    },
                     modifier = Modifier.alpha(
                         if (!firstItemVisible) {
                             1f
                         } else 0f
-                    )
+                    ),
+                    enabled = if (!firstItemVisible) {
+                        viewModel.heartEnable.observeAsState(true).value
+                    } else false
                 ) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.heart),
+                        imageVector = if (status.value!!.isFavorite) {
+                            ImageVector.vectorResource(R.drawable.heart_filled)
+                        } else {
+                            ImageVector.vectorResource(R.drawable.heart)
+                        },
                         contentDescription = null,
                         tint = MaterialTheme.colors.primary,
                     )
@@ -342,6 +348,7 @@ fun Genres(viewModel: MovieViewModel) {
 
 @Composable
 fun Reviews(viewModel: MovieViewModel) {
+    val status = viewModel.status.observeAsState()
     val isShow = viewModel.showDialog.observeAsState(false)
 
     if (isShow.value) ReviewDialog(viewModel, isShow)
@@ -371,7 +378,7 @@ fun Reviews(viewModel: MovieViewModel) {
             )
         }
 
-        movieDetail.reviews.forEach { review ->
+        status.value!!.movieDetail!!.reviews?.forEach { review ->
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -427,11 +434,13 @@ fun Reviews(viewModel: MovieViewModel) {
                         }
                     }
                     Spacer(modifier = Modifier.padding(4.dp))
-                    Text(
-                        text = review.reviewText,
-                        style = MaterialTheme.typography.body1,
-                        color = MaterialTheme.colors.primaryVariant
-                    )
+                    review.reviewText?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.body1,
+                            color = MaterialTheme.colors.primaryVariant
+                        )
+                    }
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()

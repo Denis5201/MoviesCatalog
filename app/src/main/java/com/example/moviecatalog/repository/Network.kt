@@ -1,9 +1,7 @@
 package com.example.moviecatalog.repository
 
-import com.example.moviecatalog.api.AuthApi
-import com.example.moviecatalog.api.FavoriteMoviesApi
-import com.example.moviecatalog.api.MovieApi
-import com.example.moviecatalog.api.UserApi
+import com.example.moviecatalog.Shared
+import com.example.moviecatalog.api.*
 import com.example.moviecatalog.domain.Token
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
@@ -41,10 +39,11 @@ object Network {
 
     private val retrofit = getRetrofit()
 
-    var token: Token? = null
+    var token: Token? = Shared.getString("Token")?.let { Token(it) }
 
     fun getAuthApi(): AuthApi = retrofit.create(AuthApi::class.java)
     fun getUserApi(): UserApi = retrofit.create(UserApi::class.java)
     fun getMovieApi(): MovieApi = retrofit.create(MovieApi::class.java)
     fun getFavoriteMoviesApi(): FavoriteMoviesApi = retrofit.create(FavoriteMoviesApi::class.java)
+    fun getReviewApi(): ReviewApi = retrofit.create(ReviewApi::class.java)
 }
