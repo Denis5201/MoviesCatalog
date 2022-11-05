@@ -67,6 +67,7 @@ fun MovieScreenBody(navController: NavController, viewModel: MovieViewModel) {
             lazyState.firstVisibleItemIndex == 0
         }
     }
+    val layoutInfo by remember { derivedStateOf { lazyState.layoutInfo } }
     val status = viewModel.status.observeAsState()
 
     Column {
@@ -120,11 +121,11 @@ fun MovieScreenBody(navController: NavController, viewModel: MovieViewModel) {
                               viewModel.changeFavorite()
                     },
                     modifier = Modifier.alpha(
-                        if (!firstItemVisible) {
+                        if (!firstItemVisible || layoutInfo.visibleItemsInfo.lastOrNull()?.index == layoutInfo.totalItemsCount - 1) {
                             1f
                         } else 0f
                     ),
-                    enabled = if (!firstItemVisible) {
+                    enabled = if (!firstItemVisible || layoutInfo.visibleItemsInfo.lastOrNull()?.index == layoutInfo.totalItemsCount - 1) {
                         viewModel.heartEnable.observeAsState(true).value
                     } else false
                 ) {
@@ -184,6 +185,9 @@ fun MovieScreenBody(navController: NavController, viewModel: MovieViewModel) {
             }
             item {
                 Reviews(viewModel)
+            }
+            item {
+                Spacer(modifier = Modifier)
             }
         }
     }
@@ -369,13 +373,15 @@ fun Reviews(viewModel: MovieViewModel) {
                 style = MaterialTheme.typography.h5,
                 color = MaterialTheme.colors.primaryVariant
             )
-            Image(
-                imageVector = ImageVector.vectorResource(R.drawable.new_review),
-                contentDescription = null,
-                modifier = Modifier.clickable {
-                    viewModel.changeShowDialog(!isShow.value)
-                }
-            )
+            if (!status.value!!.userHaveReview) {
+                Image(
+                    imageVector = ImageVector.vectorResource(R.drawable.new_review),
+                    contentDescription = null,
+                    modifier = Modifier.clickable {
+                        viewModel.changeShowDialog(!isShow.value)
+                    }
+                )
+            }
         }
 
         status.value!!.movieDetail!!.reviews?.forEach { review ->
@@ -404,11 +410,13 @@ fun Reviews(viewModel: MovieViewModel) {
                                 style = MaterialTheme.typography.h5,
                                 color = MaterialTheme.colors.primaryVariant
                             )
-                            Text(
-                                text = stringResource(R.string.my_review),
-                                style = MaterialTheme.typography.h4,
-                                color = MaterialTheme.colors.secondaryVariant
-                            )
+                            if (review.author.userId == viewModel.userProf.value?.userId) {
+                                Text(
+                                    text = stringResource(R.string.my_review),
+                                    style = MaterialTheme.typography.h4,
+                                    color = MaterialTheme.colors.secondaryVariant
+                                )
+                            }
                         }
 
                         Box(
@@ -452,18 +460,31 @@ fun Reviews(viewModel: MovieViewModel) {
                             style = MaterialTheme.typography.body1,
                             color = MaterialTheme.colors.secondaryVariant
                         )
-                        Row {
-                            Image(
-                                bitmap = ImageBitmap.imageResource(R.drawable.edit_review),
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.padding(4.dp))
-                            Image(
-                                bitmap = ImageBitmap.imageResource(R.drawable.delete_review),
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp)
-                            )
+                        if (review.author.userId == viewModel.userProf.value?.userId) {
+                            if (!status.value!!.userHaveReview) {
+                                viewModel.setMyReviewInfo(review)
+                            }
+                            Row {
+                                Image(
+                                    bitmap = ImageBitmap.imageResource(R.drawable.edit_review),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .clickable {
+                                            viewModel.changeShowDialog(!isShow.value)
+                                        }
+                                )
+                                Spacer(modifier = Modifier.padding(4.dp))
+                                Image(
+                                    bitmap = ImageBitmap.imageResource(R.drawable.delete_review),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .clickable {
+                                            viewModel.deleteReview(review.id)
+                                        }
+                                )
+                            }
                         }
                     }
                 }
@@ -477,6 +498,7 @@ fun Reviews(viewModel: MovieViewModel) {
 @Composable
 fun ReviewDialog(viewModel: MovieViewModel, state: State<Boolean>) {
     val stars = viewModel.stars.observeAsState().value
+    val status = viewModel.status.observeAsState()
 
     Dialog(
         onDismissRequest = { viewModel.changeShowDialog(!state.value) },
@@ -484,7 +506,7 @@ fun ReviewDialog(viewModel: MovieViewModel, state: State<Boolean>) {
     ) {
         Column(
             modifier = Modifier
-                .size(328.dp, 410.dp)
+                .size(340.dp, 410.dp)
                 .clip(MaterialTheme.shapes.large)
                 .background(colorResource(R.color.dialog))
                 .padding(start = 16.dp, top = 16.dp, end = 16.dp)
@@ -498,7 +520,7 @@ fun ReviewDialog(viewModel: MovieViewModel, state: State<Boolean>) {
                 for (i in 0..9) {
                     Box(
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(29.dp)
                             .padding(end = 6.dp)
                             .clickable { viewModel.setActiveStars(i) }
                     ) {
@@ -577,7 +599,10 @@ fun ReviewDialog(viewModel: MovieViewModel, state: State<Boolean>) {
                 verticalArrangement = Arrangement.Bottom
             ) {
                 Button(
-                    onClick = { viewModel.changeShowDialog(!state.value) }, //+запрос
+                    onClick = {
+                        if (status.value!!.userHaveReview) viewModel.changeReview() else viewModel.addReview()
+                        viewModel.changeShowDialog(!state.value)
+                              },
                     modifier = Modifier.fillMaxWidth(),
                     border = if (viewModel.save.observeAsState(false).value) {
                         null

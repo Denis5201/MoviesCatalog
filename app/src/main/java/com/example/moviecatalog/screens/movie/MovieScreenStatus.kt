@@ -9,6 +9,7 @@ data class MovieScreenStatus(
     val isFavorite: Boolean = false,
     val isError: Boolean = false,
     val errorMessage: String? = null,
+    val userHaveReview: Boolean = false,
     val isAddFavoriteSuccess: Boolean = false,
     val isDeleteFavoriteSuccess: Boolean = false,
     val isAddReviewSuccess: Boolean = false,

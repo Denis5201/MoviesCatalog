@@ -2,7 +2,7 @@ package com.example.moviecatalog.repository
 
 import android.util.Log
 import com.example.moviecatalog.api.ReviewApi
-import com.example.moviecatalog.domain.ReviewShortModel
+import com.example.moviecatalog.domain.ReviewModifyModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.flowOn
 class ReviewRepository {
     private val api: ReviewApi = Network.getReviewApi()
 
-    suspend fun addReview(movieId: String, body: ReviewShortModel): Flow<Result<Unit>> = flow {
+    suspend fun addReview(movieId: String, body: ReviewModifyModel): Flow<Result<Unit>> = flow {
         try {
             api.addReview(movieId, body)
             emit(Result.success(Unit))
@@ -21,7 +21,7 @@ class ReviewRepository {
         }
     }.flowOn(Dispatchers.IO)
 
-    suspend fun putReview(movieId: String, reviewId: String, body: ReviewShortModel): Flow<Result<Unit>> = flow {
+    suspend fun putReview(movieId: String, reviewId: String, body: ReviewModifyModel): Flow<Result<Unit>> = flow {
         try {
             api.putReview(movieId, reviewId ,body)
             emit(Result.success(Unit))

@@ -10,7 +10,7 @@ data class MovieDetailsModel(
     val year: Int,
     val country: String?,
     val genres: List<GenreModel>?,
-    val reviews: List<ReviewModel>?,
+    var reviews: List<ReviewModel>?,
     val time: Int,
     val tagline: String?,
     val description: String?,
