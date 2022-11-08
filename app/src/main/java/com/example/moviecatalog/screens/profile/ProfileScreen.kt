@@ -1,10 +1,13 @@
 package com.example.moviecatalog.screens.profile
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -14,8 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.moviecatalog.R
 import com.example.moviecatalog.Screen
 import com.example.moviecatalog.screens.*
@@ -26,24 +31,42 @@ fun ProfileScreen(
     navController: NavController,
     viewModel: ProfileViewModel
 ) {
-    if (viewModel.status.observeAsState().value?.isLoading == true) {
+    val status = viewModel.status.observeAsState()
+
+    if (status.value!!.isLoading) {
         LoadingProgress()
     } else {
         Column(modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)) {
-            Header()
+            Header(viewModel)
             ProfileLines(viewModel)
-            ProfileButtons(navController, viewModel)
+            ProfileButtons(viewModel)
         }
     }
 
-    if (viewModel.status.observeAsState().value?.isError == true) {
+    if (status.value!!.isError) {
         Toast.makeText(LocalContext.current, viewModel.status.value!!.errorMassage, Toast.LENGTH_LONG).show()
         viewModel.setDefaultStatus()
+    }
+    if (!status.value!!.logout && status.value!!.showMessage) {
+        Toast.makeText(LocalContext.current, viewModel.status.value!!.textMessage, Toast.LENGTH_SHORT).show()
+        viewModel.setDefaultStatus()
+    }
+    if (status.value!!.logout) {
+        Toast.makeText(LocalContext.current, viewModel.status.value!!.textMessage, Toast.LENGTH_SHORT).show()
+        viewModel.setDefaultStatus()
+
+        navController.navigate(Screen.LoginScreen.route) {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = false
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
     }
 }
 
 @Composable
-fun Header() {
+fun Header(viewModel: ProfileViewModel) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         GlideImage(
             imageModel = { "https://www.pinclipart.com/picdir/middle/105-1058105_tae-kwon-do-clipart.png" },
@@ -53,7 +76,7 @@ fun Header() {
                 .clip(CircleShape)
         )
         Text(
-            text = "Тест",
+            text = viewModel.nickName.observeAsState().value!!,
             modifier = Modifier.padding(start = 16.dp),
             style = MaterialTheme.typography.h3
         )
@@ -129,7 +152,7 @@ fun ProfileLines(viewModel: ProfileViewModel) {
 }
 
 @Composable
-fun ProfileButtons(navController: NavController, viewModel: ProfileViewModel) {
+fun ProfileButtons(viewModel: ProfileViewModel) {
     val context = LocalContext.current
     Column(
         modifier = Modifier
@@ -145,26 +168,28 @@ fun ProfileButtons(navController: NavController, viewModel: ProfileViewModel) {
             name = stringResource(R.string.save),
             state = viewModel.save.observeAsState(false),
             click = {
-                if (viewModel.correctMail.value!!) {
-                    viewModel.putProfile()
-                } else {
-                    Toast.makeText(context, R.string.wrong_format_mail, Toast.LENGTH_LONG).show()
-                }
+                viewModel.putProfile()
             }
         )
 
         Spacer(modifier = Modifier.padding(4.dp))
 
-        SecondButton(
-            name = stringResource(R.string.exit),
-            navController = navController,
-            route = Screen.LoginScreen.route,
-            isSave = false
-        )
-    }
-
-    if (viewModel.status.observeAsState().value!!.isSaveSuccess) {
-        Toast.makeText(context, R.string.save_success, Toast.LENGTH_LONG).show()
-        viewModel.setDefaultStatus()
+        Button(
+            onClick = {
+                      viewModel.logout()
+            },
+            modifier = Modifier.fillMaxWidth(),
+            border = BorderStroke(0.dp, MaterialTheme.colors.background),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = MaterialTheme.colors.background
+            )
+        ) {
+            Text(
+                text = stringResource(R.string.exit),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.body2,
+                color = MaterialTheme.colors.primary
+            )
+        }
     }
 }

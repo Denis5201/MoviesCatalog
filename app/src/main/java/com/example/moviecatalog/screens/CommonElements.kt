@@ -206,14 +206,13 @@ fun FirstButton(
 fun SecondButton(
     name: String,
     navController: NavController,
-    route: String,
-    isSave: Boolean = true
+    route: String
 ) {
     Button(
         onClick = {
             navController.navigate(route) {
                 popUpTo(navController.graph.findStartDestination().id) {
-                    saveState = isSave
+                    saveState = true
                 }
                 launchSingleTop = true
                 restoreState = true

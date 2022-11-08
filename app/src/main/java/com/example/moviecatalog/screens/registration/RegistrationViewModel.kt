@@ -5,6 +5,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.moviecatalog.Shared
+import com.example.moviecatalog.domain.MessageController
 import com.example.moviecatalog.domain.UserRegisterModel
 import com.example.moviecatalog.repository.AuthRepository
 import kotlinx.coroutines.launch
@@ -14,6 +16,8 @@ import java.util.*
 
 class RegistrationViewModel : ViewModel() {
     private val authRepository = AuthRepository()
+
+    val status = MutableLiveData(RegistrationScreenStatus())
 
     private val _login = MutableLiveData("")
     val login: LiveData<String> = _login
@@ -76,13 +80,8 @@ class RegistrationViewModel : ViewModel() {
     val registration: LiveData<Boolean> = _registration
 
     private val _correctMail = MutableLiveData(false)
-    val correctMail: LiveData<Boolean> = _correctMail
 
     private val _equalPasswords = MutableLiveData(false)
-    val equalPasswords: LiveData<Boolean> = _equalPasswords
-
-    private val _mayGoToMain = MutableLiveData(false)
-    val mayGoToMain: LiveData<Boolean> = _mayGoToMain
 
     private fun mayRegister() {
         _registration.value = _login.value!!.isNotEmpty() && _mail.value!!.isNotEmpty()
@@ -100,6 +99,20 @@ class RegistrationViewModel : ViewModel() {
     }
 
     fun getRegisterRequest() {
+        if (!_correctMail.value!!) {
+            status.value =  status.value!!.copy(
+                showMessage = true,
+                textMessage = MessageController.getTextMessage(MessageController.WRONG_FORMAT_MAIL)
+            )
+            return
+        }
+        if (!_equalPasswords.value!!) {
+            status.value =  status.value!!.copy(
+                showMessage = true,
+                textMessage = MessageController.getTextMessage(MessageController.PASSWORDS_NOT_EQUAL)
+            )
+            return
+        }
         viewModelScope.launch {
             val registerBody = UserRegisterModel(
                     _login.value!!,
@@ -112,11 +125,23 @@ class RegistrationViewModel : ViewModel() {
             authRepository.register(registerBody)
                 .collect { result ->
                     result.onSuccess {
-                        _mayGoToMain.value = true
+                        Shared.setString(Shared.TOKEN, it.token)
+                        status.value =  status.value!!.copy(
+                            mayGoToMain = true,
+                            showMessage = true,
+                            textMessage = MessageController.getTextMessage(MessageController.REGISTER_SUCCESS)
+                        )
                     }.onFailure {
-
+                        status.value = status.value!!.copy(
+                            isError = true,
+                            errorMessage = it.message
+                        )
                     }
                 }
         }
+    }
+
+    fun setDefaultStatus() {
+        status.value = RegistrationScreenStatus()
     }
 }

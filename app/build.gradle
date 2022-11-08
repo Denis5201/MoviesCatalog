@@ -66,6 +66,7 @@ dependencies {
     implementation "com.github.skydoves:landscapist-glide:2.0.2"
     implementation "me.onebone:toolbar-compose:2.3.4"
     implementation "com.google.accompanist:accompanist-flowlayout:0.27.0"
+    implementation "androidx.security:security-crypto:1.0.0"
 
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0"

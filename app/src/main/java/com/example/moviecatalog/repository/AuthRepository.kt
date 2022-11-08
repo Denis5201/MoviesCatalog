@@ -23,7 +23,6 @@ class AuthRepository {
             emit(Result.failure(e))
         }
     }.flowOn(Dispatchers.IO)
-    //.catch { }        //!!!
 
     suspend fun login(body: LoginCredentialsModel): Flow<Result<Token>> = flow{
         try {
@@ -32,6 +31,17 @@ class AuthRepository {
             emit(Result.success(token))
         } catch (e: Exception) {
             Log.e("OPS login", e.message.toString())
+            emit(Result.failure(e))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    suspend fun logout(): Flow<Result<Unit>> = flow{
+        try {
+            Network.token = Token("")
+            api.logout()
+            emit(Result.success(Unit))
+        } catch (e: Exception) {
+            Log.e("OPS logout", e.message.toString())
             emit(Result.failure(e))
         }
     }.flowOn(Dispatchers.IO)

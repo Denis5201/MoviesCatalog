@@ -5,7 +5,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.moviecatalog.Shared
+import com.example.moviecatalog.domain.MessageController
 import com.example.moviecatalog.domain.ProfileModel
+import com.example.moviecatalog.repository.AuthRepository
 import com.example.moviecatalog.repository.UserRepository
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -15,6 +18,8 @@ import java.util.*
 
 class ProfileViewModel : ViewModel() {
     private val userRepository = UserRepository()
+    private val authRepository = AuthRepository()
+
     val status = MutableLiveData(ProfileScreenStatus())
     private var profile: ProfileModel? = null
 
@@ -40,6 +45,9 @@ class ProfileViewModel : ViewModel() {
         maySave()
     }
 
+    private val _nickName = MutableLiveData("")
+    val nickName: LiveData<String> = _nickName
+
     private val dateToFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
     private var dateForServer:String = ""
 
@@ -63,7 +71,6 @@ class ProfileViewModel : ViewModel() {
     val save: LiveData<Boolean> = _save
 
     private val _correctMail = MutableLiveData(false)
-    val correctMail: LiveData<Boolean> = _correctMail
 
     private fun maySave() {
         _save.value = _mail.value!!.isNotEmpty() && _name.value!!.isNotEmpty()
@@ -87,6 +94,7 @@ class ProfileViewModel : ViewModel() {
                 .collect { result ->
                     result.onSuccess {
                         profile = it
+                        _nickName.value = it.nickName
                         _mail.value = it.email
                         _avatar.value = it.avatarLink ?: ""
                         _name.value = it.name
@@ -108,10 +116,18 @@ class ProfileViewModel : ViewModel() {
     }
 
     fun putProfile() {
+        if (!_correctMail.value!!) {
+            status.value =  status.value!!.copy(
+                showMessage = true,
+                textMessage = MessageController.getTextMessage(MessageController.WRONG_FORMAT_MAIL)
+            )
+            return
+        }
+
         viewModelScope.launch {
             val profileBody = ProfileModel(
                 profile!!.id,
-                profile!!.nickName,
+                _nickName.value!!,
                 _mail.value!!,
                 _avatar.value,
                 _name.value!!,
@@ -121,13 +137,37 @@ class ProfileViewModel : ViewModel() {
             userRepository.putProfile(profileBody)
                 .collect { result ->
                     result.onSuccess {
-                        status.value = status.value?.copy(
-                            isSaveSuccess = true
+                        status.value = status.value!!.copy(
+                            showMessage = true,
+                            textMessage = MessageController.getTextMessage(MessageController.SAVE_PROFILE_SUCCESS)
                         )
                     }.onFailure {
-                        status.value = status.value?.copy(
+                        status.value = status.value!!.copy(
                             isError = true,
                             errorMassage = it.message
+                        )
+                    }
+                }
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            authRepository.logout()
+                .collect { result ->
+                    result.onSuccess {
+                        Shared.setString(Shared.TOKEN, "not")
+                        status.value = status.value!!.copy(
+                            showMessage = true,
+                            textMessage = MessageController.getTextMessage(MessageController.LOGOUT),
+                            logout = true
+                        )
+                    }.onFailure {
+                        Shared.setString(Shared.TOKEN, "not")
+                        status.value = status.value!!.copy(
+                            showMessage = true,
+                            textMessage = MessageController.getTextMessage(MessageController.LOGOUT),
+                            logout = true
                         )
                     }
                 }
@@ -138,7 +178,8 @@ class ProfileViewModel : ViewModel() {
         status.value = status.value?.copy(
             isLoading = false,
             isError = false,
-            isSaveSuccess = false
+            showMessage = false,
+            logout = false
         )
     }
 }

@@ -1,11 +1,13 @@
 package com.example.moviecatalog.screens.login
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -22,6 +24,25 @@ fun LoginScreen(
     navController: NavController,
     viewModel: LoginViewModel
 ) {
+    val status = viewModel.status.observeAsState()
+
+    if (status.value!!.isError) {
+        Toast.makeText(LocalContext.current, status.value!!.errorMessage, Toast.LENGTH_LONG).show()
+        viewModel.setDefaultStatus()
+    }
+    if (status.value!!.mayGoToMain) {
+        Toast.makeText(LocalContext.current, status.value!!.textMessage, Toast.LENGTH_SHORT).show()
+        viewModel.setDefaultStatus()
+
+        navController.navigate(Screen.MainScreen.route) {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
     Column {
         Logo()
         InputLines(viewModel)
@@ -102,16 +123,5 @@ fun Buttons(navController: NavController, viewModel: LoginViewModel) {
             navController = navController,
             route = Screen.RegistrationScreen.route
         )
-
-        if (viewModel.mayGoToMain.observeAsState().value == true) {
-            viewModel.setMayGoToMain(false)
-            navController.navigate(Screen.MainScreen.route) {
-                popUpTo(navController.graph.findStartDestination().id) {
-                    saveState = true
-                }
-                launchSingleTop = true
-                restoreState = true
-            }
-        }
     }
 }

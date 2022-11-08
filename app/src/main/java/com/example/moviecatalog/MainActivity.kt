@@ -1,5 +1,6 @@
 package com.example.moviecatalog
 
+import android.content.res.Resources
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,5 +27,10 @@ class MainActivity : ComponentActivity() {
             }
         }
         Shared.init(this)
+        myResources = this.resources
+    }
+
+    companion object {
+        lateinit var myResources: Resources
     }
 }

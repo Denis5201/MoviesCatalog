@@ -26,6 +26,29 @@ fun RegistrationScreen(
     navController: NavController,
     viewModel: RegistrationViewModel
 ) {
+    val status = viewModel.status.observeAsState()
+
+    if (status.value!!.isError) {
+        Toast.makeText(LocalContext.current, status.value!!.errorMessage, Toast.LENGTH_LONG).show()
+        viewModel.setDefaultStatus()
+    }
+    if (!status.value!!.mayGoToMain && status.value!!.showMessage) {
+        Toast.makeText(LocalContext.current, status.value!!.textMessage, Toast.LENGTH_SHORT).show()
+        viewModel.setDefaultStatus()
+    }
+    if (status.value!!.mayGoToMain) {
+        Toast.makeText(LocalContext.current, status.value!!.textMessage, Toast.LENGTH_SHORT).show()
+        viewModel.setDefaultStatus()
+
+        navController.navigate(Screen.MainScreen.route) {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
     Column {
         SmallLogo()
         Text(
@@ -136,15 +159,7 @@ fun RegButtons(navController: NavController, viewModel: RegistrationViewModel) {
             name = stringResource(R.string.set_registration),
             state = viewModel.registration.observeAsState(false),
             click = {
-                if (viewModel.correctMail.value!!) {
-                    if (viewModel.equalPasswords.value!!) {
-                        viewModel.getRegisterRequest()
-                    } else {
-                        Toast.makeText(context, R.string.passwords_not_equal, Toast.LENGTH_LONG).show()
-                    }
-                } else {
-                    Toast.makeText(context, R.string.wrong_format_mail, Toast.LENGTH_LONG).show()
-                }
+                viewModel.getRegisterRequest()
             }
         )
 
@@ -155,15 +170,5 @@ fun RegButtons(navController: NavController, viewModel: RegistrationViewModel) {
             navController = navController,
             route = Screen.LoginScreen.route
         )
-    }
-
-    if (viewModel.mayGoToMain.observeAsState(false).value) {
-        navController.navigate(Screen.MainScreen.route) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
-            launchSingleTop = true
-            restoreState = true
-        }
     }
 }

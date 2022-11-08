@@ -39,6 +39,11 @@
     <string name="review">Отзыв</string>
     <string name="anonymous_review">Анонимный отзыв</string>
     <string name="cancel">Отмена</string>
-    <string name="save_success">Данные сохранены</string>
+    <string name="save_profile_success">Данные сохранены</string>
     <string name="token">Token</string>
+    <string name="auth_success">Вход выполнен</string>
+    <string name="logout">Вы вышли из аккаунта</string>
+    <string name="favorite_add">Фильм добавлен в избранное</string>
+    <string name="favorite_delete">Фильм удалён из избранного</string>
+    <string name="register_success">Регистрация выполнена</string>
 </resources>

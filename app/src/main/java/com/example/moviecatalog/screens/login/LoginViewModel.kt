@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.moviecatalog.Shared
 import com.example.moviecatalog.domain.LoginCredentialsModel
+import com.example.moviecatalog.domain.MessageController
 import com.example.moviecatalog.repository.AuthRepository
 import com.example.moviecatalog.repository.UserRepository
 import kotlinx.coroutines.launch
@@ -13,6 +14,8 @@ import kotlinx.coroutines.launch
 class LoginViewModel : ViewModel() {
     private val authRepository = AuthRepository()
     private val userRepository = UserRepository()
+
+    val status = MutableLiveData(LoginScreenStatus())
 
     private val _name = MutableLiveData("")
     val name: LiveData<String> = _name
@@ -31,12 +34,6 @@ class LoginViewModel : ViewModel() {
     private val _entrance = MutableLiveData(false)
     val entrance: LiveData<Boolean> = _entrance
 
-    private val _mayGoToMain = MutableLiveData(false)
-    val mayGoToMain: LiveData<Boolean> = _mayGoToMain
-    fun setMayGoToMain(value: Boolean) {
-        _mayGoToMain.value = value
-    }
-
     init {
         alreadyEnter()
     }
@@ -54,12 +51,17 @@ class LoginViewModel : ViewModel() {
             authRepository.login(loginBody)
                 .collect { result ->
                     result.onSuccess {
-                        Shared.setString("Token", it.token)
-                        /*val shared = context.get()!!.getSharedPreferences(context.get()!!.getString(R.string.shared), Context.MODE_PRIVATE)
-                        shared.edit().putString(context.get()!!.getString(R.string.shared), it.token)*/
-                        _mayGoToMain.value = true
+                        Shared.setString(Shared.TOKEN, it.token)
+                        status.value =  status.value!!.copy(
+                            mayGoToMain = true,
+                            showMessage = true,
+                            textMessage = MessageController.getTextMessage(MessageController.AUTH_SUCCESS)
+                        )
                     }.onFailure {
-
+                        status.value = status.value!!.copy(
+                            isError = true,
+                            errorMessage = it.message
+                        )
                     }
                 }
         }
@@ -70,11 +72,19 @@ class LoginViewModel : ViewModel() {
             userRepository.getProfile()
                 .collect { result ->
                     result.onSuccess {
-                        _mayGoToMain.value = true
+                        status.value =  status.value!!.copy(
+                            mayGoToMain = true,
+                            showMessage = true,
+                            textMessage = MessageController.getTextMessage(MessageController.AUTH_SUCCESS)
+                        )
                     }.onFailure {
 
                     }
                 }
         }
+    }
+
+    fun setDefaultStatus() {
+        status.value = LoginScreenStatus()
     }
 }

@@ -2,12 +2,22 @@ package com.example.moviecatalog
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 
 object Shared {
     private const val PREFERENCE_NAME: String = "shared"
+    private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+
+    const val TOKEN = "Token"
 
     fun init(context: Context) {
-        preferences = context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
+        preferences = EncryptedSharedPreferences.create(
+            PREFERENCE_NAME,
+            masterKeyAlias,
+            context,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM)
     }
 
     lateinit var preferences: SharedPreferences
