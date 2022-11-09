@@ -55,17 +55,17 @@ fun MovieScreen(navController: NavController, viewModel: MovieViewModel, movieId
         state = state,
         scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
         toolbar = {
+
             val textSize = (24 + 12 * state.toolbarState.progress).sp
-
             val textStartPadding = (54 - 32 * state.toolbarState.progress).dp
-
-
             val textTopPadding = (10 + 38 * state.toolbarState.progress).dp
+
             Box(
                 modifier = Modifier
                     .background(MaterialTheme.colors.background)
                     .pin()
                     .height(56.dp)
+                    .fillMaxWidth()
             )
             GlideImage(
                 imageModel = { status.value!!.movieDetail?.poster },
@@ -77,10 +77,17 @@ fun MovieScreen(navController: NavController, viewModel: MovieViewModel, movieId
                     .height(250.dp)
                     .alpha(state.toolbarState.progress),
                 failure = {
-                    Image(
-                        bitmap = ImageBitmap.imageResource(R.drawable.logo),
-                        contentDescription = null
-                    )
+                    Box(
+                        modifier = Modifier
+                            .height(200.dp)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            bitmap = ImageBitmap.imageResource(R.drawable.logo),
+                            contentDescription = null
+                        )
+                    }
                 }
             )
             status.value!!.movieDetail?.name?.let {
@@ -93,7 +100,12 @@ fun MovieScreen(navController: NavController, viewModel: MovieViewModel, movieId
                     overflow = TextOverflow.Ellipsis,
                     maxLines = if (textSize > 26.sp) 4 else 1,
                     modifier = Modifier
-                        .padding(start = textStartPadding, top = textTopPadding, end = 40.dp, bottom = 16.dp)
+                        .padding(
+                            start = textStartPadding,
+                            top = textTopPadding,
+                            end = 40.dp,
+                            bottom = 16.dp
+                        )
                         .road(
                             whenCollapsed = Alignment.TopStart,
                             whenExpanded = Alignment.BottomStart
@@ -165,11 +177,19 @@ fun MovieScreen(navController: NavController, viewModel: MovieViewModel, movieId
 
 
     if (status.value!!.isError) {
-        Toast.makeText(LocalContext.current, viewModel.status.value!!.errorMessage, Toast.LENGTH_LONG).show()
+        Toast.makeText(
+            LocalContext.current,
+            viewModel.status.value!!.errorMessage,
+            Toast.LENGTH_LONG
+        ).show()
         viewModel.setDefaultStatus()
     }
     if (status.value!!.showMessage) {
-        Toast.makeText(LocalContext.current, viewModel.status.value!!.textMessage, Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            LocalContext.current,
+            viewModel.status.value!!.textMessage,
+            Toast.LENGTH_SHORT
+        ).show()
         viewModel.setDefaultStatus()
     }
 
@@ -184,31 +204,31 @@ fun MovieScreen(navController: NavController, viewModel: MovieViewModel, movieId
 fun MovieScreenBody(viewModel: MovieViewModel) {
     val status = viewModel.status.observeAsState()
 
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            item {
-                Text(
-                    text = if (status.value!!.movieDetail!!.description != null) status.value!!.movieDetail!!.description!! else "Описания нет",
-                    style = MaterialTheme.typography.body1,
-                    color = MaterialTheme.colors.primaryVariant,
-                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
-                )
-            }
-            item {
-                AboutMovie(viewModel)
-            }
-            item {
-                Genres(viewModel)
-            }
-            item {
-                Reviews(viewModel)
-            }
-            item {
-                Spacer(modifier = Modifier)
-            }
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        item {
+            Text(
+                text = if (status.value!!.movieDetail!!.description != null) status.value!!.movieDetail!!.description!! else "Описания нет",
+                style = MaterialTheme.typography.body1,
+                color = MaterialTheme.colors.primaryVariant,
+                modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
+            )
+        }
+        item {
+            AboutMovie(viewModel)
+        }
+        item {
+            Genres(viewModel)
+        }
+        item {
+            Reviews(viewModel)
+        }
+        item {
+            Spacer(modifier = Modifier)
         }
     }
+}
 
 
 @Composable
@@ -381,7 +401,10 @@ fun Reviews(viewModel: MovieViewModel) {
                                 .size(40.dp)
                                 .clip(CircleShape),
                             failure = {
-                                Image(bitmap = ImageBitmap.imageResource(R.drawable.avatar_default), contentDescription = null)
+                                Image(
+                                    bitmap = ImageBitmap.imageResource(R.drawable.avatar_default),
+                                    contentDescription = null
+                                )
                             }
                         )
                         Column(modifier = Modifier.padding(start = 16.dp)) {
@@ -436,7 +459,7 @@ fun Reviews(viewModel: MovieViewModel) {
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = parsingISO8601(review.createDateTime) ,
+                            text = parsingISO8601(review.createDateTime),
                             style = MaterialTheme.typography.body1,
                             color = MaterialTheme.colors.secondaryVariant
                         )

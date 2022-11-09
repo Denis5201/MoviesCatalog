@@ -48,7 +48,7 @@ class ProfileViewModel : ViewModel() {
     val nickName: LiveData<String> = _nickName
 
     private val dateToFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
-    private var dateForServer:String = ""
+    private var dateForServer: String = ""
 
     private val _date = MutableLiveData("")
     val date: LiveData<String> = _date
@@ -113,7 +113,7 @@ class ProfileViewModel : ViewModel() {
 
     fun putProfile() {
         if (!isCorrectMail()) {
-            status.value =  status.value!!.copy(
+            status.value = status.value!!.copy(
                 showMessage = true,
                 textMessage = MessageController.getTextMessage(MessageController.WRONG_FORMAT_MAIL)
             )

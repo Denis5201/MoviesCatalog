@@ -79,7 +79,10 @@ fun Header(viewModel: ProfileViewModel) {
                 .size(88.dp)
                 .clip(CircleShape),
             failure = {
-                Image(bitmap = ImageBitmap.imageResource(R.drawable.avatar_default), contentDescription = null)
+                Image(
+                    bitmap = ImageBitmap.imageResource(R.drawable.avatar_default),
+                    contentDescription = null
+                )
             }
         )
         Text(
@@ -160,7 +163,6 @@ fun ProfileLines(viewModel: ProfileViewModel) {
 
 @Composable
 fun ProfileButtons(viewModel: ProfileViewModel) {
-    val context = LocalContext.current
     Column(
         modifier = Modifier
             .padding(
@@ -183,7 +185,7 @@ fun ProfileButtons(viewModel: ProfileViewModel) {
 
         Button(
             onClick = {
-                      viewModel.logout()
+                viewModel.logout()
             },
             modifier = Modifier.fillMaxWidth(),
             border = BorderStroke(0.dp, MaterialTheme.colors.background),

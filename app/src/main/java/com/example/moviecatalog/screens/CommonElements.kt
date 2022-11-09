@@ -82,7 +82,7 @@ fun DateDialog(
 
     OutlinedTextField(
         value = state.value,
-        onValueChange = {  },
+        onValueChange = { },
         trailingIcon = {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.date_icon),

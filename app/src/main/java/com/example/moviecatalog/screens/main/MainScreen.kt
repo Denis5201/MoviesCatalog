@@ -81,7 +81,17 @@ fun Banner(navController: NavController, status: MutableState<MainScreenStatus>)
                 .fillMaxHeight()
                 .fillMaxWidth(),
             failure = {
-                Image(bitmap = ImageBitmap.imageResource(R.drawable.logo), contentDescription = null)
+                Box(
+                    modifier = Modifier
+                        .height(200.dp)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        bitmap = ImageBitmap.imageResource(R.drawable.logo),
+                        contentDescription = null
+                    )
+                }
             }
         )
         Box(
@@ -151,7 +161,7 @@ fun Favourites(navController: NavController, viewModel: MainViewModel) {
                 )
                 Button(
                     onClick = {
-                              viewModel.deleteFavorite(favorites.value!![i].id)
+                        viewModel.deleteFavorite(favorites.value!![i].id)
                     },
                     modifier = Modifier
                         .size(20.dp, 20.dp)
