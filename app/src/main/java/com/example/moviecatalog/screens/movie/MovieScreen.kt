@@ -8,17 +8,13 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -44,57 +40,72 @@ import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
+import me.onebone.toolbar.CollapsingToolbarScaffold
+import me.onebone.toolbar.ScrollStrategy
+import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 
 @Composable
 fun MovieScreen(navController: NavController, viewModel: MovieViewModel, movieId: String?) {
     val status = viewModel.status.observeAsState()
 
-    if (status.value!!.isLoading) {
-        LoadingProgress()
-    } else {
-        MovieScreenBody(navController, viewModel)
-    }
-    if (status.value!!.isStart) {
-        viewModel.initialScreen(movieId!!)
-    }
+    val state = rememberCollapsingToolbarScaffoldState()
 
-    if (status.value!!.isError) {
-        Toast.makeText(LocalContext.current, viewModel.status.value!!.errorMessage, Toast.LENGTH_LONG).show()
-        viewModel.setDefaultStatus()
-    }
-    if (status.value!!.showMessage) {
-        Toast.makeText(LocalContext.current, viewModel.status.value!!.textMessage, Toast.LENGTH_SHORT).show()
-        viewModel.setDefaultStatus()
-    }
+    CollapsingToolbarScaffold(
+        modifier = Modifier,
+        state = state,
+        scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
+        toolbar = {
+            val textSize = (24 + 12 * state.toolbarState.progress).sp
 
-    BackHandler {
-        if (viewModel.favoriteInStart.value != viewModel.status.value!!.isFavorite)
-            FavoriteUpdateParameter.isFavouriteChange = true
-        navController.navigateUp()
-    }
-}
+            val textStartPadding = (54 - 32 * state.toolbarState.progress).dp
 
-@Composable
-fun MovieScreenBody(navController: NavController, viewModel: MovieViewModel) {
-    val lazyState = rememberLazyListState()
-    val firstItemVisible by remember {
-        derivedStateOf {
-            lazyState.firstVisibleItemIndex == 0
-        }
-    }
-    val layoutInfo by remember { derivedStateOf { lazyState.layoutInfo } }
-    val status = viewModel.status.observeAsState()
 
-    Column {
-        Box(
-            modifier = Modifier
-                .background(MaterialTheme.colors.background)
-                .fillMaxWidth()
-        ) {
+            val textTopPadding = (10 + 38 * state.toolbarState.progress).dp
+            Box(
+                modifier = Modifier
+                    .background(MaterialTheme.colors.background)
+                    .pin()
+                    .height(56.dp)
+            )
+            GlideImage(
+                imageModel = { status.value!!.movieDetail?.poster },
+                imageOptions = ImageOptions(
+                    contentScale = ContentScale.FillWidth,
+                    alignment = Alignment.TopCenter
+                ),
+                modifier = Modifier
+                    .height(250.dp)
+                    .alpha(state.toolbarState.progress),
+                failure = {
+                    Image(
+                        bitmap = ImageBitmap.imageResource(R.drawable.logo),
+                        contentDescription = null
+                    )
+                }
+            )
+            status.value!!.movieDetail?.name?.let {
+                Text(
+                    text = it,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MaterialTheme.typography.body1.fontFamily,
+                    fontSize = textSize,
+                    color = MaterialTheme.colors.primaryVariant,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = if (textSize > 26.sp) 4 else 1,
+                    modifier = Modifier
+                        .padding(start = textStartPadding, top = textTopPadding, end = 40.dp, bottom = 16.dp)
+                        .road(
+                            whenCollapsed = Alignment.TopStart,
+                            whenExpanded = Alignment.BottomStart
+                        )
+                )
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp), verticalAlignment = Alignment.CenterVertically
+                    .height(56.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
                     onClick = {
@@ -115,34 +126,19 @@ fun MovieScreenBody(navController: NavController, viewModel: MovieViewModel) {
                         tint = MaterialTheme.colors.primaryVariant
                     )
                 }
-                Text(
-                    text = status.value!!.movieDetail!!.name,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = MaterialTheme.typography.body1.fontFamily,
-                    fontSize = 24.sp,
-                    color = MaterialTheme.colors.primaryVariant,
-                    modifier = Modifier
-                        .fillMaxWidth(0.87f)
-                        .alpha(
-                            if (!firstItemVisible) {
-                                1f
-                            } else 0f
-                        ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
                 IconButton(
                     onClick = {
-                              viewModel.changeFavorite()
+                        viewModel.changeFavorite()
                     },
                     modifier = Modifier.alpha(
-                        if (!firstItemVisible || layoutInfo.visibleItemsInfo.lastOrNull()?.index == layoutInfo.totalItemsCount - 1) {
+                        if (textSize < 26.sp) {
                             1f
                         } else 0f
                     ),
-                    enabled = if (!firstItemVisible || layoutInfo.visibleItemsInfo.lastOrNull()?.index == layoutInfo.totalItemsCount - 1) {
+                    enabled = if (textSize < 26.sp) {
                         viewModel.heartEnable.observeAsState(true).value
                     } else false
+
                 ) {
                     Icon(
                         imageVector = if (status.value!!.isFavorite) {
@@ -155,37 +151,42 @@ fun MovieScreenBody(navController: NavController, viewModel: MovieViewModel) {
                     )
                 }
             }
+        }) {
+        if (status.value!!.isLoading) {
+            LoadingProgress()
+        } else {
+            MovieScreenBody(viewModel)
         }
+        if (status.value!!.isStart) {
+            viewModel.initialScreen(movieId!!)
+        }
+    }
+
+
+
+    if (status.value!!.isError) {
+        Toast.makeText(LocalContext.current, viewModel.status.value!!.errorMessage, Toast.LENGTH_LONG).show()
+        viewModel.setDefaultStatus()
+    }
+    if (status.value!!.showMessage) {
+        Toast.makeText(LocalContext.current, viewModel.status.value!!.textMessage, Toast.LENGTH_SHORT).show()
+        viewModel.setDefaultStatus()
+    }
+
+    BackHandler {
+        if (viewModel.favoriteInStart.value != viewModel.status.value!!.isFavorite)
+            FavoriteUpdateParameter.isFavouriteChange = true
+        navController.navigateUp()
+    }
+}
+
+@Composable
+fun MovieScreenBody(viewModel: MovieViewModel) {
+    val status = viewModel.status.observeAsState()
+
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
-            /*.nestedScroll(nestedScrollConnection)*/,
-            state = lazyState
         ) {
-            item {
-                Box(contentAlignment = Alignment.BottomStart) {
-                    GlideImage(
-                        imageModel = { status.value!!.movieDetail!!.poster},
-                        imageOptions = ImageOptions(
-                            contentScale = ContentScale.FillWidth,
-                            alignment = Alignment.TopCenter
-                        ),
-                        modifier = Modifier
-                            .height(250.dp),
-                        failure = {
-                            Image(bitmap = ImageBitmap.imageResource(R.drawable.logo), contentDescription = null)
-                        }
-                    )
-                    Text(
-                        text = status.value!!.movieDetail!!.name,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = MaterialTheme.typography.body1.fontFamily,
-                        fontSize = 36.sp,
-                        color = MaterialTheme.colors.primaryVariant,
-                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-                    )
-                }
-
-            }
             item {
                 Text(
                     text = if (status.value!!.movieDetail!!.description != null) status.value!!.movieDetail!!.description!! else "Описания нет",
@@ -208,7 +209,7 @@ fun MovieScreenBody(navController: NavController, viewModel: MovieViewModel) {
             }
         }
     }
-}
+
 
 @Composable
 fun AboutMovie(viewModel: MovieViewModel) {
