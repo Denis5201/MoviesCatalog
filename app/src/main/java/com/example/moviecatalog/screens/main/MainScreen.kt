@@ -1,5 +1,6 @@
 package com.example.moviecatalog.screens.main
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,9 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
@@ -47,6 +51,15 @@ fun MainScreen(navController: NavController, viewModel: MainViewModel) {
     if (FavoriteUpdateParameter.isFavouriteChange) {
         viewModel.changeFavoriteFromMovieScreen()
     }
+
+    if (viewModel.status.value.isError) {
+        Toast.makeText(LocalContext.current, viewModel.status.value.errorMessage, Toast.LENGTH_LONG).show()
+        viewModel.setDefaultStatus()
+    }
+    if (viewModel.status.value.showMessage) {
+        Toast.makeText(LocalContext.current, viewModel.status.value.textMessage, Toast.LENGTH_SHORT).show()
+        viewModel.setDefaultStatus()
+    }
 }
 
 @Composable
@@ -66,12 +79,15 @@ fun Banner(navController: NavController, status: MutableState<MainScreenStatus>)
             ),
             modifier = Modifier
                 .fillMaxHeight()
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            failure = {
+                Image(bitmap = ImageBitmap.imageResource(R.drawable.logo), contentDescription = null)
+            }
         )
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.05f)
+                .fillMaxHeight(0.1f)
                 .background(
                     Brush.verticalGradient(
                         listOf(
@@ -91,7 +107,7 @@ fun Banner(navController: NavController, status: MutableState<MainScreenStatus>)
                     restoreState = true
                 }
             },
-            modifier = Modifier.padding(bottom = 5.dp)
+            modifier = Modifier.padding(bottom = 16.dp)
         ) {
             Text(text = stringResource(R.string.watching))
         }
@@ -107,7 +123,7 @@ fun Favourites(navController: NavController, viewModel: MainViewModel) {
         style = MaterialTheme.typography.h1,
         modifier = Modifier.padding(top = 16.dp)
     )
-    Spacer(modifier = Modifier.padding(8.dp))
+    Spacer(modifier = Modifier.padding(4.dp))
     LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         items(favorites.value!!.size) { i ->
             Box(
@@ -159,8 +175,8 @@ fun Gallery(navController: NavController, viewModel: MainViewModel) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
     ) {
-        item {
-            if (favorites.value!!.isNotEmpty()) {
+        if (favorites.value!!.isNotEmpty()) {
+            item {
                 Favourites(navController, viewModel)
             }
         }
@@ -170,7 +186,6 @@ fun Gallery(navController: NavController, viewModel: MainViewModel) {
                 style = MaterialTheme.typography.h1,
                 modifier = Modifier.padding(top = 16.dp)
             )
-            Spacer(modifier = Modifier.padding(8.dp))
         }
         items(state.value.items.size) { i ->
             if (i != 0) {

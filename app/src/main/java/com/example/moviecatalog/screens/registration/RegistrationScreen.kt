@@ -142,7 +142,6 @@ fun RegistrationLines(viewModel: RegistrationViewModel) {
 
 @Composable
 fun RegButtons(navController: NavController, viewModel: RegistrationViewModel) {
-    val context = LocalContext.current
     Column(
         modifier = Modifier
             .padding(

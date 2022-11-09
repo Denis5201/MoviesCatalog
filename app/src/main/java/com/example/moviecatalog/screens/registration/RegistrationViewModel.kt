@@ -79,10 +79,6 @@ class RegistrationViewModel : ViewModel() {
     private val _registration = MutableLiveData(false)
     val registration: LiveData<Boolean> = _registration
 
-    private val _correctMail = MutableLiveData(false)
-
-    private val _equalPasswords = MutableLiveData(false)
-
     private fun mayRegister() {
         _registration.value = _login.value!!.isNotEmpty() && _mail.value!!.isNotEmpty()
                 && _name.value!!.isNotEmpty() && _password.value!!.isNotEmpty()
@@ -90,23 +86,23 @@ class RegistrationViewModel : ViewModel() {
                 && _selectGender.value != 2
     }
 
-    private fun isCorrectMail() {
-        _correctMail.value = Patterns.EMAIL_ADDRESS.matcher(_mail.value!!).matches()
+    private fun isCorrectMail(): Boolean {
+        return Patterns.EMAIL_ADDRESS.matcher(_mail.value!!).matches()
     }
 
-    private fun isEqualPasswords() {
-        _equalPasswords.value = _password.value == _confirmPassword.value
+    private fun isEqualPasswords(): Boolean {
+        return _password.value == _confirmPassword.value
     }
 
     fun getRegisterRequest() {
-        if (!_correctMail.value!!) {
+        if (!isCorrectMail()) {
             status.value =  status.value!!.copy(
                 showMessage = true,
                 textMessage = MessageController.getTextMessage(MessageController.WRONG_FORMAT_MAIL)
             )
             return
         }
-        if (!_equalPasswords.value!!) {
+        if (!isEqualPasswords()) {
             status.value =  status.value!!.copy(
                 showMessage = true,
                 textMessage = MessageController.getTextMessage(MessageController.PASSWORDS_NOT_EQUAL)

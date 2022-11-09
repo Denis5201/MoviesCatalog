@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.moviecatalog.domain.MessageController
 import com.example.moviecatalog.domain.ReviewModel
 import com.example.moviecatalog.domain.ReviewModifyModel
 import com.example.moviecatalog.domain.UserShortModel
@@ -133,7 +134,9 @@ class MovieViewModel: ViewModel() {
                     .collect { result ->
                         result.onSuccess {
                             status.value = status.value!!.copy(
-                                isFavorite = !status.value!!.isFavorite
+                                isFavorite = !status.value!!.isFavorite,
+                                showMessage = true,
+                                textMessage = MessageController.getTextMessage(MessageController.FAVORITE_DELETE)
                             )
                             _heartEnable.value = true
                         }.onFailure {
@@ -149,7 +152,9 @@ class MovieViewModel: ViewModel() {
                     .collect { result ->
                         result.onSuccess {
                             status.value = status.value!!.copy(
-                                isFavorite = !status.value!!.isFavorite
+                                isFavorite = !status.value!!.isFavorite,
+                                showMessage = true,
+                                textMessage = MessageController.getTextMessage(MessageController.FAVORITE_ADD)
                             )
                             _heartEnable.value = true
                         }.onFailure {
@@ -195,7 +200,9 @@ class MovieViewModel: ViewModel() {
                         temp.add(0, newReview)
                         status.value!!.movieDetail!!.reviews = temp
                         status.value = status.value!!.copy(
-                            userHaveReview = true
+                            userHaveReview = true,
+                            showMessage = true,
+                            textMessage = MessageController.getTextMessage(MessageController.REVIEW_ADD)
                         )
                         setMyReviewInfo(newReview)
                     }.onFailure {
@@ -218,7 +225,10 @@ class MovieViewModel: ViewModel() {
             reviewRepository.putReview(movieId, _myReviewInfo.value!!.id, reviewBody)
                 .collect { result ->
                     result.onSuccess {
-
+                        status.value = status.value!!.copy(
+                            showMessage = true,
+                            textMessage = MessageController.getTextMessage(MessageController.REVIEW_CHANGE)
+                        )
                     }.onFailure {
                         status.value = status.value!!.copy(
                             isError = true,
@@ -239,6 +249,8 @@ class MovieViewModel: ViewModel() {
                         status.value!!.movieDetail!!.reviews = temp
                         status.value = status.value!!.copy(
                             userHaveReview = false,
+                            showMessage = true,
+                            textMessage = MessageController.getTextMessage(MessageController.REVIEW_DELETE)
                         )
                         _textDialogReview.value = ""
                         setActiveStars(-1)
@@ -251,5 +263,12 @@ class MovieViewModel: ViewModel() {
                     }
                 }
         }
+    }
+
+    fun setDefaultStatus() {
+        status.value = status.value!!.copy(
+            isError = false,
+            showMessage = false
+        )
     }
 }

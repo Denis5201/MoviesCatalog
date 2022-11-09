@@ -8,6 +8,8 @@ data class MainScreenStatus(
     val items: List<MovieElementModel> = emptyList(),
     val isError: Boolean = false,
     val errorMessage: String? = null,
+    val showMessage: Boolean = false,
+    val textMessage: String? = null,
     val endReached: Boolean = false,
     val nextPage: Int = 1,
 )

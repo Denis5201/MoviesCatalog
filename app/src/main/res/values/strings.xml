@@ -46,4 +46,7 @@
     <string name="favorite_add">Фильм добавлен в избранное</string>
     <string name="favorite_delete">Фильм удалён из избранного</string>
     <string name="register_success">Регистрация выполнена</string>
+    <string name="review_add">Отзыв добавлен</string>
+    <string name="review_change">Отзыв изменён</string>
+    <string name="review_delete">Отзыв удалён</string>
 </resources>

@@ -10,9 +10,9 @@ import com.example.moviecatalog.domain.MessageController
 import com.example.moviecatalog.domain.ProfileModel
 import com.example.moviecatalog.repository.AuthRepository
 import com.example.moviecatalog.repository.UserRepository
+import com.example.moviecatalog.screens.parsingISO8601
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.*
 
@@ -28,7 +28,6 @@ class ProfileViewModel : ViewModel() {
     fun setMail(value: String) {
         _mail.value = value
         maySave()
-        isCorrectMail()
     }
 
     private val _avatar = MutableLiveData("")
@@ -70,15 +69,13 @@ class ProfileViewModel : ViewModel() {
     private val _save = MutableLiveData(false)
     val save: LiveData<Boolean> = _save
 
-    private val _correctMail = MutableLiveData(false)
-
     private fun maySave() {
         _save.value = _mail.value!!.isNotEmpty() && _name.value!!.isNotEmpty()
                 && date.value!!.isNotEmpty() && selectGender.value != 2
     }
 
-    private fun isCorrectMail() {
-        _correctMail.value = Patterns.EMAIL_ADDRESS.matcher(_mail.value!!).matches()
+    private fun isCorrectMail(): Boolean {
+        return Patterns.EMAIL_ADDRESS.matcher(_mail.value!!).matches()
     }
 
     init {
@@ -99,8 +96,7 @@ class ProfileViewModel : ViewModel() {
                         _avatar.value = it.avatarLink ?: ""
                         _name.value = it.name
 
-                        if (it.birthDate.last() != 'Z') it.birthDate += 'Z'
-                        _date.value = dateToFormat.format(Date.from(Instant.parse(it.birthDate)))
+                        _date.value = parsingISO8601(it.birthDate)
                         dateForServer = it.birthDate
 
                         _selectGender.value = it.gender
@@ -116,7 +112,7 @@ class ProfileViewModel : ViewModel() {
     }
 
     fun putProfile() {
-        if (!_correctMail.value!!) {
+        if (!isCorrectMail()) {
             status.value =  status.value!!.copy(
                 showMessage = true,
                 textMessage = MessageController.getTextMessage(MessageController.WRONG_FORMAT_MAIL)

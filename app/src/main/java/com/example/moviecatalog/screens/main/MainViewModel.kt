@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.moviecatalog.domain.MessageController
 import com.example.moviecatalog.domain.MovieElementModel
 import com.example.moviecatalog.repository.FavoriteMoviesRepository
 import com.example.moviecatalog.repository.MovieRepository
@@ -83,6 +84,10 @@ class MainViewModel : ViewModel() {
                         val temp = _favorites.value!!.toMutableList()
                         temp.removeIf { it.id == movieId }
                         _favorites.value = temp
+                        status.value = status.value.copy(
+                            showMessage = true,
+                            textMessage = MessageController.getTextMessage(MessageController.FAVORITE_DELETE)
+                        )
                     }.onFailure {
                         status.value = status.value.copy(
                             isError = true,
@@ -96,5 +101,12 @@ class MainViewModel : ViewModel() {
     fun changeFavoriteFromMovieScreen() {
         FavoriteUpdateParameter.isFavouriteChange = false
         getFavorites()
+    }
+
+    fun setDefaultStatus() {
+        status.value = status.value.copy(
+            isError = false,
+            showMessage = false
+        )
     }
 }

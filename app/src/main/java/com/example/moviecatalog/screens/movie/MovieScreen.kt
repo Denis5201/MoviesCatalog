@@ -1,14 +1,24 @@
 package com.example.moviecatalog.screens.movie
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -17,25 +27,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.example.moviecatalog.R
 import com.example.moviecatalog.Screen
-import com.example.moviecatalog.screens.FavoriteUpdateParameter
-import com.example.moviecatalog.screens.LoadingProgress
-import com.example.moviecatalog.screens.calculateGreenByMark
-import com.example.moviecatalog.screens.calculateRedByMark
+import com.example.moviecatalog.screens.*
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.skydoves.landscapist.ImageOptions
@@ -43,13 +47,24 @@ import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun MovieScreen(navController: NavController, viewModel: MovieViewModel, movieId: String?) {
-    if (viewModel.status.observeAsState().value?.isLoading == true) {
+    val status = viewModel.status.observeAsState()
+
+    if (status.value!!.isLoading) {
         LoadingProgress()
     } else {
         MovieScreenBody(navController, viewModel)
     }
-    if (viewModel.status.observeAsState().value?.isStart == true) {
+    if (status.value!!.isStart) {
         viewModel.initialScreen(movieId!!)
+    }
+
+    if (status.value!!.isError) {
+        Toast.makeText(LocalContext.current, viewModel.status.value!!.errorMessage, Toast.LENGTH_LONG).show()
+        viewModel.setDefaultStatus()
+    }
+    if (status.value!!.showMessage) {
+        Toast.makeText(LocalContext.current, viewModel.status.value!!.textMessage, Toast.LENGTH_SHORT).show()
+        viewModel.setDefaultStatus()
     }
 
     BackHandler {
@@ -150,13 +165,15 @@ fun MovieScreenBody(navController: NavController, viewModel: MovieViewModel) {
                 Box(contentAlignment = Alignment.BottomStart) {
                     GlideImage(
                         imageModel = { status.value!!.movieDetail!!.poster},
-                        previewPlaceholder = R.drawable.logo,
                         imageOptions = ImageOptions(
                             contentScale = ContentScale.FillWidth,
                             alignment = Alignment.TopCenter
                         ),
                         modifier = Modifier
-                            .height(250.dp)
+                            .height(250.dp),
+                        failure = {
+                            Image(bitmap = ImageBitmap.imageResource(R.drawable.logo), contentDescription = null)
+                        }
                     )
                     Text(
                         text = status.value!!.movieDetail!!.name,
@@ -208,12 +225,7 @@ fun AboutMovie(viewModel: MovieViewModel) {
             color = MaterialTheme.colors.primaryVariant
         )
         Row(modifier = Modifier.padding(top = 8.dp)) {
-            Text(
-                text = stringResource(R.string.year),
-                style = MaterialTheme.typography.h6,
-                color = colorResource(R.color.about),
-                modifier = Modifier.width(100.dp)
-            )
+            NameDetail(idString = R.string.year)
             Text(
                 text = "${movieDetails!!.year}",
                 style = MaterialTheme.typography.h6,
@@ -221,12 +233,7 @@ fun AboutMovie(viewModel: MovieViewModel) {
             )
         }
         Row(modifier = Modifier.padding(top = 8.dp)) {
-            Text(
-                text = stringResource(R.string.country),
-                style = MaterialTheme.typography.h6,
-                color = colorResource(R.color.about),
-                modifier = Modifier.width(100.dp)
-            )
+            NameDetail(idString = R.string.country)
             Text(
                 text = if (movieDetails!!.country != null) movieDetails.country!! else "-",
                 style = MaterialTheme.typography.h6,
@@ -234,12 +241,7 @@ fun AboutMovie(viewModel: MovieViewModel) {
             )
         }
         Row(modifier = Modifier.padding(top = 8.dp)) {
-            Text(
-                text = stringResource(R.string.time),
-                style = MaterialTheme.typography.h6,
-                color = colorResource(R.color.about),
-                modifier = Modifier.width(100.dp)
-            )
+            NameDetail(idString = R.string.time)
             Text(
                 text = "${movieDetails!!.time} мин",
                 style = MaterialTheme.typography.h6,
@@ -247,12 +249,7 @@ fun AboutMovie(viewModel: MovieViewModel) {
             )
         }
         Row(modifier = Modifier.padding(top = 8.dp)) {
-            Text(
-                text = stringResource(R.string.tagline),
-                style = MaterialTheme.typography.h6,
-                color = colorResource(R.color.about),
-                modifier = Modifier.width(100.dp)
-            )
+            NameDetail(idString = R.string.tagline)
             Text(
                 text = if (movieDetails!!.tagline != null) movieDetails.tagline!! else "-",
                 style = MaterialTheme.typography.h6,
@@ -260,12 +257,7 @@ fun AboutMovie(viewModel: MovieViewModel) {
             )
         }
         Row(modifier = Modifier.padding(top = 8.dp)) {
-            Text(
-                text = stringResource(R.string.director),
-                style = MaterialTheme.typography.h6,
-                color = colorResource(R.color.about),
-                modifier = Modifier.width(100.dp)
-            )
+            NameDetail(idString = R.string.director)
             Text(
                 text = if (movieDetails!!.director != null) movieDetails.director!! else "-",
                 style = MaterialTheme.typography.h6,
@@ -273,38 +265,23 @@ fun AboutMovie(viewModel: MovieViewModel) {
             )
         }
         Row(modifier = Modifier.padding(top = 8.dp)) {
+            NameDetail(idString = R.string.budget)
             Text(
-                text = stringResource(R.string.budget),
-                style = MaterialTheme.typography.h6,
-                color = colorResource(R.color.about),
-                modifier = Modifier.width(100.dp)
-            )
-            Text(
-                text = "$${movieDetails!!.budget}",
+                text = if (movieDetails!!.budget != null) "$${spaceForNumber(movieDetails.budget!!)}" else "-",
                 style = MaterialTheme.typography.h6,
                 color = MaterialTheme.colors.primaryVariant
             )
         }
         Row(modifier = Modifier.padding(top = 8.dp)) {
+            NameDetail(idString = R.string.fees)
             Text(
-                text = stringResource(R.string.fees),
-                style = MaterialTheme.typography.h6,
-                color = colorResource(R.color.about),
-                modifier = Modifier.width(100.dp)
-            )
-            Text(
-                text = "$${movieDetails!!.fees}",
+                text = if (movieDetails!!.fees != null) "$${spaceForNumber(movieDetails.fees!!)}" else "-",
                 style = MaterialTheme.typography.h6,
                 color = MaterialTheme.colors.primaryVariant
             )
         }
         Row(modifier = Modifier.padding(top = 8.dp)) {
-            Text(
-                text = stringResource(R.string.age_limit),
-                style = MaterialTheme.typography.h6,
-                color = colorResource(R.color.about),
-                modifier = Modifier.width(100.dp)
-            )
+            NameDetail(idString = R.string.age_limit)
             Text(
                 text = "${movieDetails!!.ageLimit}+",
                 style = MaterialTheme.typography.h6,
@@ -399,10 +376,12 @@ fun Reviews(viewModel: MovieViewModel) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         GlideImage(
                             imageModel = { review.author.avatar },
-                            previewPlaceholder = R.drawable.logo,
                             modifier = Modifier
                                 .size(40.dp)
-                                .clip(CircleShape)
+                                .clip(CircleShape),
+                            failure = {
+                                Image(bitmap = ImageBitmap.imageResource(R.drawable.avatar_default), contentDescription = null)
+                            }
                         )
                         Column(modifier = Modifier.padding(start = 16.dp)) {
                             Text(
@@ -456,7 +435,7 @@ fun Reviews(viewModel: MovieViewModel) {
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = review.createDateTime,
+                            text = parsingISO8601(review.createDateTime) ,
                             style = MaterialTheme.typography.body1,
                             color = MaterialTheme.colors.secondaryVariant
                         )
@@ -492,157 +471,5 @@ fun Reviews(viewModel: MovieViewModel) {
             }
         }
 
-    }
-}
-
-@Composable
-fun ReviewDialog(viewModel: MovieViewModel, state: State<Boolean>) {
-    val stars = viewModel.stars.observeAsState().value
-    val status = viewModel.status.observeAsState()
-
-    Dialog(
-        onDismissRequest = { viewModel.changeShowDialog(!state.value) },
-        properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
-    ) {
-        Column(
-            modifier = Modifier
-                .size(340.dp, 410.dp)
-                .clip(MaterialTheme.shapes.large)
-                .background(colorResource(R.color.dialog))
-                .padding(start = 16.dp, top = 16.dp, end = 16.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.send_review),
-                style = MaterialTheme.typography.h1,
-                color = MaterialTheme.colors.primaryVariant,
-            )
-            Row(modifier = Modifier.padding(top = 12.dp)) {
-                for (i in 0..9) {
-                    Box(
-                        modifier = Modifier
-                            .size(29.dp)
-                            .padding(end = 6.dp)
-                            .clickable { viewModel.setActiveStars(i) }
-                    ) {
-                        Image(
-                            imageVector = ImageVector.vectorResource(R.drawable.background_star_svg),
-                            contentDescription = null,
-                            alpha = if (stars!![i]) 1f else 0f,
-                            modifier = Modifier.fillMaxSize(),
-                            alignment = Alignment.TopStart
-                        )
-                        Image(
-                            imageVector = if (stars[i]) {
-                                ImageVector.vectorResource(R.drawable.enable_star_svg)
-                            } else {
-                                ImageVector.vectorResource(R.drawable.disenable_star_svg)
-                            },
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(22.dp)
-                                .padding(start = 2.dp, top = 2.dp),
-                            alignment = Alignment.Center
-                        )
-                    }
-                }
-            }
-            TextField(
-                value = viewModel.textDialogReview.observeAsState("").value,
-                onValueChange = { viewModel.setTextDialogReview(it) },
-                shape = MaterialTheme.shapes.small,
-                modifier = Modifier
-                    .padding(top = 16.dp)
-                    .size(296.dp, 120.dp),
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.review),
-                        color = colorResource(R.color.dialog_placeholder),
-                        fontFamily = MaterialTheme.typography.h6.fontFamily,
-                        fontSize = 14.sp
-                    )
-                },
-                textStyle = TextStyle(
-                    fontFamily = MaterialTheme.typography.h6.fontFamily,
-                    fontSize = 14.sp,
-                    color = colorResource(R.color.background)
-                ),
-                colors = TextFieldDefaults.textFieldColors(
-                    backgroundColor = MaterialTheme.colors.primaryVariant,
-                    focusedIndicatorColor = Color(0f, 0f, 0f, 0f)
-                )
-            )
-            Row(
-                modifier = Modifier
-                    .padding(top = 16.dp)
-                    .height(24.dp), verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.anonymous_review),
-                    style = MaterialTheme.typography.h5,
-                    color = MaterialTheme.colors.primaryVariant
-                )
-                Checkbox(
-                    checked = viewModel.isAnonymous.observeAsState(false).value,
-                    onCheckedChange = { viewModel.changeIsAnonymous(it) },
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = MaterialTheme.colors.background,
-                        uncheckedColor = MaterialTheme.colors.secondary,
-                        checkmarkColor = MaterialTheme.colors.primary
-                    )
-                )
-            }
-            Column(
-                modifier = Modifier
-                    .padding(top = 16.dp, bottom = 16.dp)
-                    .fillMaxWidth()
-                    .fillMaxHeight(),
-                verticalArrangement = Arrangement.Bottom
-            ) {
-                Button(
-                    onClick = {
-                        if (status.value!!.userHaveReview) viewModel.changeReview() else viewModel.addReview()
-                        viewModel.changeShowDialog(!state.value)
-                              },
-                    modifier = Modifier.fillMaxWidth(),
-                    border = if (viewModel.save.observeAsState(false).value) {
-                        null
-                    } else {
-                        BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant)
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        disabledBackgroundColor = colorResource(R.color.dialog)
-                    ),
-                    enabled = viewModel.save.observeAsState(false).value
-                ) {
-                    Text(
-                        text = stringResource(R.string.save),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.body2,
-                        color = if (viewModel.save.observeAsState(false).value) {
-                            MaterialTheme.colors.primaryVariant
-                        } else {
-                            MaterialTheme.colors.primary
-                        }
-                    )
-                }
-
-                Spacer(modifier = Modifier.padding(4.dp))
-
-                Button(
-                    onClick = { viewModel.changeShowDialog(!state.value) },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = colorResource(R.color.dialog)
-                    )
-                ) {
-                    Text(
-                        text = stringResource(R.string.cancel),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.body2,
-                        color = MaterialTheme.colors.primary
-                    )
-                }
-            }
-        }
     }
 }

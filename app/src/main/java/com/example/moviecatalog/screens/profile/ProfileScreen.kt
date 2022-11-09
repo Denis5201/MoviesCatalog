@@ -2,6 +2,7 @@ package com.example.moviecatalog.screens.profile
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -15,7 +16,9 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -67,13 +70,17 @@ fun ProfileScreen(
 
 @Composable
 fun Header(viewModel: ProfileViewModel) {
+    val avatarLink = viewModel.avatar.observeAsState()
     Row(verticalAlignment = Alignment.CenterVertically) {
         GlideImage(
-            imageModel = { "https://www.pinclipart.com/picdir/middle/105-1058105_tae-kwon-do-clipart.png" },
+            imageModel = { avatarLink.value },
             previewPlaceholder = R.drawable.logo,
             modifier = Modifier
                 .size(88.dp)
-                .clip(CircleShape)
+                .clip(CircleShape),
+            failure = {
+                Image(bitmap = ImageBitmap.imageResource(R.drawable.avatar_default), contentDescription = null)
+            }
         )
         Text(
             text = viewModel.nickName.observeAsState().value!!,

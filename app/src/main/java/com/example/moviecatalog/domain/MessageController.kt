@@ -13,6 +13,9 @@ object MessageController {
     const val REGISTER_SUCCESS = 6
     const val LOGOUT = 7
     const val SAVE_PROFILE_SUCCESS = 8
+    const val REVIEW_ADD = 9
+    const val REVIEW_CHANGE = 10
+    const val REVIEW_DELETE = 11
 
     fun getTextMessage(messageCode: Int): String {
         return when (messageCode) {
@@ -24,6 +27,9 @@ object MessageController {
             REGISTER_SUCCESS -> MainActivity.myResources.getString(R.string.register_success)
             LOGOUT -> MainActivity.myResources.getString(R.string.logout)
             SAVE_PROFILE_SUCCESS -> MainActivity.myResources.getString(R.string.save_profile_success)
+            REVIEW_ADD -> MainActivity.myResources.getString(R.string.review_add)
+            REVIEW_CHANGE -> MainActivity.myResources.getString(R.string.review_change)
+            REVIEW_DELETE -> MainActivity.myResources.getString(R.string.review_delete)
             else -> ""
         }
     }
