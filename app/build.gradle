@@ -64,7 +64,7 @@ dependencies {
     implementation 'androidx.core:core-splashscreen:1.0.0'
 
     implementation "com.github.skydoves:landscapist-glide:2.0.2"
-    implementation "me.onebone:toolbar-compose:2.3.4"
+    implementation "me.onebone:toolbar-compose:2.3.5"
     implementation "com.google.accompanist:accompanist-flowlayout:0.27.0"
     implementation "androidx.security:security-crypto:1.0.0"
 
