@@ -68,7 +68,7 @@ fun ReviewDialog(viewModel: MovieViewModel, state: State<Boolean>) {
                             contentDescription = null,
                             modifier = Modifier
                                 .size(22.dp)
-                                .padding(start = 2.dp, top = 2.dp),
+                                .padding(top = 2.dp),
                             alignment = Alignment.Center
                         )
                     }
@@ -113,7 +113,7 @@ fun ReviewDialog(viewModel: MovieViewModel, state: State<Boolean>) {
                     color = MaterialTheme.colors.primaryVariant
                 )
                 Box(
-                    modifier =  Modifier
+                    modifier = Modifier
                         .size(24.dp)
                         .border(1.dp, MaterialTheme.colors.secondary, MaterialTheme.shapes.small)
                         .clickable { viewModel.changeIsAnonymous(!isAnonymous.value) },
@@ -140,7 +140,9 @@ fun ReviewDialog(viewModel: MovieViewModel, state: State<Boolean>) {
                         if (status.value!!.userHaveReview) viewModel.changeReview() else viewModel.addReview()
                         viewModel.changeShowDialog(!state.value)
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
                     border = if (viewModel.save.observeAsState(false).value) {
                         null
                     } else {
@@ -167,7 +169,9 @@ fun ReviewDialog(viewModel: MovieViewModel, state: State<Boolean>) {
 
                 Button(
                     onClick = { viewModel.changeShowDialog(!state.value) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = colorResource(R.color.dialog)
                     )

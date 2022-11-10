@@ -26,14 +26,13 @@ class MovieViewModel: ViewModel() {
     val favoriteInStart: LiveData<Boolean> = _favoriteInStart
 
     private val _userProf = MutableLiveData<UserShortModel>()
-    val userProf: LiveData<UserShortModel> = _userProf
 
     private val _myReviewInfo = MutableLiveData<ReviewModel>()
     val myReviewInfo: LiveData<ReviewModel> = _myReviewInfo
-    fun setMyReviewInfo(value: ReviewModel) {
+    private fun setMyReviewInfo(value: ReviewModel) {
         _myReviewInfo.value = value
         _textDialogReview.value = value.reviewText
-        setActiveStars(value.rating)
+        setActiveStars(value.rating - 1)
         _isAnonymous.value = value.isAnonymous
         status.value = status.value!!.copy(
             userHaveReview = true
@@ -79,17 +78,56 @@ class MovieViewModel: ViewModel() {
     val heartEnable: LiveData<Boolean> = _heartEnable
 
     private fun maySave() {
-        _save.value = _stars.value!![0] != false
+        _save.value = _stars.value!![0] != false && _textDialogReview.value!!.isNotEmpty()
     }
 
     fun initialScreen(id: String) {
         status.value = status.value!!.copy(isStart = false)
-        userIdFromProfile()
         movieId = id
+        getFavorites()
         getDetailsRequest()
     }
 
+    fun beforeInit() {
+        status.value = status.value!!.copy(makingRequest = true)
+        getProfile()
+    }
+
     private fun getDetailsRequest() {
+        viewModelScope.launch {
+            movieRepository.details(movieId)
+                .collect { result ->
+                    result.onSuccess {
+                        status.value = status.value!!.copy(
+                            isLoading = false,
+                            movieDetail = it
+                        )
+                        for (index in 0 until (it.reviews?.size ?: -1)) {
+                            if (it.reviews!![index].author != null) {
+                                if (it.reviews!![index].author!!.userId == _userProf.value!!.userId) {
+                                    setMyReviewInfo(it.reviews!![index])
+
+                                    val temp = it.reviews!!.toMutableList()
+                                    val myReview = temp.removeAt(index)
+                                    temp.add(0, myReview)
+                                    status.value!!.movieDetail!!.reviews = temp
+
+                                    break
+                                }
+                            }
+                        }
+
+                    }.onFailure {
+                        status.value = status.value!!.copy(
+                            isError = true,
+                            errorMessage = it.message
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun getFavorites() {
         viewModelScope.launch {
             favoriteMoviesRepository.getFavorites()
                 .collect { result ->
@@ -102,20 +140,6 @@ class MovieViewModel: ViewModel() {
                                 _favoriteInStart.value = status.value!!.isFavorite
                             }
                         }
-                    }.onFailure {
-                        status.value = status.value!!.copy(
-                            isError = true,
-                            errorMessage = it.message
-                        )
-                    }
-                }
-            movieRepository.details(movieId)
-                .collect { result ->
-                    result.onSuccess {
-                       status.value = status.value!!.copy(
-                           isLoading = false,
-                           movieDetail = it
-                       )
                     }.onFailure {
                         status.value = status.value!!.copy(
                             isError = true,
@@ -169,12 +193,16 @@ class MovieViewModel: ViewModel() {
         }
     }
 
-    private fun userIdFromProfile() {
+    private fun getProfile() {
         viewModelScope.launch {
             userRepository.getProfile()
                 .collect { result ->
                     result.onSuccess {
                         _userProf.value = UserShortModel(it.id, it.nickName, it.avatarLink)
+                        status.value = status.value!!.copy(
+                            isGetProfile = true,
+                            makingRequest = false
+                        )
                     }.onFailure {
                         status.value = status.value!!.copy(
                             isError = true,
@@ -191,20 +219,17 @@ class MovieViewModel: ViewModel() {
             for (i in 0..9) {
                 if (_stars.value!![i]) rating = i + 1
             }
-            val reviewBody = ReviewModifyModel(_textDialogReview.value!!, rating, _isAnonymous.value!!)
+            val reviewBody =
+                ReviewModifyModel(_textDialogReview.value!!, rating, _isAnonymous.value!!)
             reviewRepository.addReview(movieId, reviewBody)
                 .collect { result ->
                     result.onSuccess {
-                        val temp = status.value!!.movieDetail!!.reviews!!.toMutableList()
-                        val newReview = ReviewModel(_userProf.value!!.userId, rating, _textDialogReview.value, _isAnonymous.value!!, "", _userProf.value!!)
-                        temp.add(0, newReview)
-                        status.value!!.movieDetail!!.reviews = temp
                         status.value = status.value!!.copy(
                             userHaveReview = true,
                             showMessage = true,
                             textMessage = MessageController.getTextMessage(MessageController.REVIEW_ADD)
                         )
-                        setMyReviewInfo(newReview)
+                        getDetailsRequest()
                     }.onFailure {
                         status.value = status.value!!.copy(
                             isError = true,
@@ -221,10 +246,16 @@ class MovieViewModel: ViewModel() {
             for (i in 0..9) {
                 if (_stars.value!![i]) rating = i + 1
             }
-            val reviewBody = ReviewModifyModel(_textDialogReview.value!!, rating, _isAnonymous.value!!)
+            val reviewBody =
+                ReviewModifyModel(_textDialogReview.value!!, rating, _isAnonymous.value!!)
             reviewRepository.putReview(movieId, _myReviewInfo.value!!.id, reviewBody)
                 .collect { result ->
                     result.onSuccess {
+                        status.value!!.movieDetail!!.reviews!![0].rating = rating
+                        status.value!!.movieDetail!!.reviews!![0].reviewText =
+                            _textDialogReview.value
+                        status.value!!.movieDetail!!.reviews!![0].isAnonymous = _isAnonymous.value!!
+
                         status.value = status.value!!.copy(
                             showMessage = true,
                             textMessage = MessageController.getTextMessage(MessageController.REVIEW_CHANGE)
@@ -239,14 +270,15 @@ class MovieViewModel: ViewModel() {
         }
     }
 
-    fun deleteReview(reviewId: String) {
+    fun deleteReview() {
         viewModelScope.launch {
-            reviewRepository.deleteReview(movieId, reviewId)
+            reviewRepository.deleteReview(movieId, _myReviewInfo.value!!.id)
                 .collect { result ->
                     result.onSuccess {
                         val temp = status.value!!.movieDetail!!.reviews!!.toMutableList()
-                        temp.removeIf { it.id == reviewId }
+                        temp.removeIf { it.id == _myReviewInfo.value!!.id }
                         status.value!!.movieDetail!!.reviews = temp
+
                         status.value = status.value!!.copy(
                             userHaveReview = false,
                             showMessage = true,

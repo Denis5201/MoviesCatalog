@@ -58,7 +58,7 @@ class RegistrationViewModel : ViewModel() {
     }
 
     private val dateToFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
-    private var dateForServer:String = ""
+    private var dateForServer: String = ""
 
     private val _date = MutableLiveData("")
     val date: LiveData<String> = _date
@@ -74,6 +74,12 @@ class RegistrationViewModel : ViewModel() {
     fun setSelectGender(value: Int) {
         _selectGender.value = value
         mayRegister()
+    }
+
+    private val _start = MutableLiveData(true)
+    val start: LiveData<Boolean> = _start
+    fun setStart(value: Boolean) {
+        _start.value = value
     }
 
     private val _registration = MutableLiveData(false)
@@ -96,14 +102,14 @@ class RegistrationViewModel : ViewModel() {
 
     fun getRegisterRequest() {
         if (!isCorrectMail()) {
-            status.value =  status.value!!.copy(
+            status.value = status.value!!.copy(
                 showMessage = true,
                 textMessage = MessageController.getTextMessage(MessageController.WRONG_FORMAT_MAIL)
             )
             return
         }
         if (!isEqualPasswords()) {
-            status.value =  status.value!!.copy(
+            status.value = status.value!!.copy(
                 showMessage = true,
                 textMessage = MessageController.getTextMessage(MessageController.PASSWORDS_NOT_EQUAL)
             )
@@ -111,18 +117,18 @@ class RegistrationViewModel : ViewModel() {
         }
         viewModelScope.launch {
             val registerBody = UserRegisterModel(
-                    _login.value!!,
-                    _name.value!!,
-                    _password.value!!,
-                    _mail.value!!,
-                    dateForServer,
-                    _selectGender.value!!
+                _login.value!!,
+                _name.value!!,
+                _password.value!!,
+                _mail.value!!,
+                dateForServer,
+                _selectGender.value!!
             )
             authRepository.register(registerBody)
                 .collect { result ->
                     result.onSuccess {
                         Shared.setString(Shared.TOKEN, it.token)
-                        status.value =  status.value!!.copy(
+                        status.value = status.value!!.copy(
                             mayGoToMain = true,
                             showMessage = true,
                             textMessage = MessageController.getTextMessage(MessageController.REGISTER_SUCCESS)

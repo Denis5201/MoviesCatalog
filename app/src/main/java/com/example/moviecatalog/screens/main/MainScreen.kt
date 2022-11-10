@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
@@ -165,11 +166,23 @@ fun Favourites(navController: NavController, viewModel: MainViewModel) {
                     },
                     modifier = Modifier
                         .size(20.dp, 20.dp)
-                        .padding(top = 2.dp, end = 2.dp),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(R.color.deleteFavour)),
+                        .padding(top = 4.dp, end = 4.dp),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                     contentPadding = PaddingValues(0.dp)
                 ) {
-                    Image(ImageVector.vectorResource(R.drawable.delete_icon), null)
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp, 12.dp)
+                            .clip(CircleShape)
+                            .background(colorResource(R.color.deleteFavour)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            ImageVector.vectorResource(R.drawable.delete_icon),
+                            contentDescription = null,
+                            modifier = Modifier.size(8.dp, 8.dp)
+                        )
+                    }
                 }
             }
         }

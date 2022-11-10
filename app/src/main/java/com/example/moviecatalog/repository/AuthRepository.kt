@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.flowOn
 class AuthRepository {
     private val api: AuthApi = Network.getAuthApi()
 
-    suspend fun register(body: UserRegisterModel): Flow<Result<Token>> = flow{
+    suspend fun register(body: UserRegisterModel): Flow<Result<Token>> = flow {
         try {
             val token = api.register(body)
             Network.token = token
@@ -24,7 +24,7 @@ class AuthRepository {
         }
     }.flowOn(Dispatchers.IO)
 
-    suspend fun login(body: LoginCredentialsModel): Flow<Result<Token>> = flow{
+    suspend fun login(body: LoginCredentialsModel): Flow<Result<Token>> = flow {
         try {
             val token = api.login(body)
             Network.token = token
@@ -35,7 +35,7 @@ class AuthRepository {
         }
     }.flowOn(Dispatchers.IO)
 
-    suspend fun logout(): Flow<Result<Unit>> = flow{
+    suspend fun logout(): Flow<Result<Unit>> = flow {
         try {
             Network.token = Token("")
             api.logout()

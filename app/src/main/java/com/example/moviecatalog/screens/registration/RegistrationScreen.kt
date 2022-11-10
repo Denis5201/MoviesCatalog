@@ -1,6 +1,8 @@
 package com.example.moviecatalog.screens.registration
 
 import android.widget.Toast
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -8,6 +10,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,7 +53,7 @@ fun RegistrationScreen(
     }
 
     Column {
-        SmallLogo()
+        SmallLogo(viewModel)
         Text(
             text = stringResource(R.string.registration),
             style = MaterialTheme.typography.h1,
@@ -59,14 +62,24 @@ fun RegistrationScreen(
         RegistrationLines(viewModel)
         RegButtons(navController, viewModel)
     }
+    if (viewModel.start.observeAsState().value!! && !status.value!!.mayGoToMain) {
+        viewModel.setStart(false)
+    }
 }
 
 @Composable
-fun SmallLogo() {
+fun SmallLogo(viewModel: RegistrationViewModel) {
+    val start = viewModel.start.observeAsState(true)
+
+    val animatedFloat: Float by animateFloatAsState(
+        targetValue = if (start.value) 0.28f else 0.2f,
+        animationSpec = tween(1000)
+    )
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.2f)
+            .fillMaxHeight(animatedFloat)
             .padding(top = 30.dp),
         contentAlignment = Alignment.Center
     ) {

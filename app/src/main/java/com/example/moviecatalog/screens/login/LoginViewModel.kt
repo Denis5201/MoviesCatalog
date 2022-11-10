@@ -52,7 +52,7 @@ class LoginViewModel : ViewModel() {
                 .collect { result ->
                     result.onSuccess {
                         Shared.setString(Shared.TOKEN, it.token)
-                        status.value =  status.value!!.copy(
+                        status.value = status.value!!.copy(
                             mayGoToMain = true,
                             showMessage = true,
                             textMessage = MessageController.getTextMessage(MessageController.AUTH_SUCCESS)
@@ -72,7 +72,7 @@ class LoginViewModel : ViewModel() {
             userRepository.getProfile()
                 .collect { result ->
                     result.onSuccess {
-                        status.value =  status.value!!.copy(
+                        status.value = status.value!!.copy(
                             mayGoToMain = true,
                             showMessage = true,
                             textMessage = MessageController.getTextMessage(MessageController.AUTH_SUCCESS)

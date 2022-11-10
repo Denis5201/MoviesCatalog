@@ -49,4 +49,5 @@
     <string name="review_add">Отзыв добавлен</string>
     <string name="review_change">Отзыв изменён</string>
     <string name="review_delete">Отзыв удалён</string>
+    <string name="error">Ошибка</string>
 </resources>

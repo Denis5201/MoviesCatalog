@@ -5,9 +5,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ReviewModel(
     val id: String,
-    val rating: Int,
-    val reviewText: String?,
-    val isAnonymous: Boolean,
+    var rating: Int,
+    var reviewText: String?,
+    var isAnonymous: Boolean,
     val createDateTime: String,
-    val author: UserShortModel
+    val author: UserShortModel?
 )

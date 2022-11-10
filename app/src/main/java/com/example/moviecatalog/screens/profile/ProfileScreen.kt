@@ -187,7 +187,9 @@ fun ProfileButtons(viewModel: ProfileViewModel) {
             onClick = {
                 viewModel.logout()
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp),
             border = BorderStroke(0.dp, MaterialTheme.colors.background),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.colors.background

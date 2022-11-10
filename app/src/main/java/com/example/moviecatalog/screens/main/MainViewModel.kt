@@ -65,7 +65,8 @@ class MainViewModel : ViewModel() {
                         status.value = status.value.copy(
                             isLoading = false
                         )
-                        _favorites.value = (it.movies ?: mutableListOf()) as MutableList<MovieElementModel>
+                        _favorites.value =
+                            (it.movies ?: mutableListOf()) as MutableList<MovieElementModel>
                     }.onFailure {
                         status.value = status.value.copy(
                             isError = true,

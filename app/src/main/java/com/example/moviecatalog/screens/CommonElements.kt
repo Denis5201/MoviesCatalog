@@ -47,12 +47,14 @@ fun OneInputLine(
             fontFamily = MaterialTheme.typography.body1.fontFamily,
             color = MaterialTheme.colors.primary
         ),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp),
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = MaterialTheme.colors.secondaryVariant,
             unfocusedBorderColor = MaterialTheme.colors.secondaryVariant
         ),
-        shape = MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.medium,
         visualTransformation = if (isPassword)
             PasswordVisualTransformation()
         else
@@ -106,20 +108,23 @@ fun DateDialog(
             .clickable {
                 datePickerDialog.show()
             }
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .height(52.dp),
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = MaterialTheme.colors.secondaryVariant,
             unfocusedBorderColor = MaterialTheme.colors.secondaryVariant,
             disabledBorderColor = MaterialTheme.colors.secondaryVariant
         ),
-        shape = MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.medium,
         enabled = false
     )
 }
 
 @Composable
 fun ChoosingGender(state: State<Int>, valChange: (Int) -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth()) {
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .height(48.dp)) {
         Button(
             onClick = { valChange(1) },
             border = BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant),
@@ -179,7 +184,9 @@ fun FirstButton(
 ) {
     Button(
         onClick = { click() },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp),
         border = if (state.value) {
             null
         } else {
@@ -216,7 +223,9 @@ fun SecondButton(
                 restoreState = true
             }
         },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp),
         border = BorderStroke(0.dp, MaterialTheme.colors.background),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = MaterialTheme.colors.background

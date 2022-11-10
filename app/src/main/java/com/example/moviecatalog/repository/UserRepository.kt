@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.flowOn
 class UserRepository {
     private val api: UserApi = Network.getUserApi()
 
-    suspend fun getProfile(): Flow<Result<ProfileModel>> = flow{
+    suspend fun getProfile(): Flow<Result<ProfileModel>> = flow {
         try {
             val profile = api.getProfile()
             emit(Result.success(profile))
@@ -21,7 +21,7 @@ class UserRepository {
         }
     }.flowOn(Dispatchers.IO)
 
-    suspend fun putProfile(body: ProfileModel): Flow<Result<Unit>> = flow{
+    suspend fun putProfile(body: ProfileModel): Flow<Result<Unit>> = flow {
         try {
             api.putProfile(body)
             emit(Result.success(Unit))

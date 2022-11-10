@@ -25,7 +25,7 @@ object Network {
             addInterceptor(HttpLoggingInterceptor().setLevel(logLevel))
         }
 
-        return  client.build()
+        return client.build()
     }
 
     private fun getRetrofit(): Retrofit {

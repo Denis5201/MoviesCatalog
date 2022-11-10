@@ -8,6 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -169,7 +170,9 @@ fun MovieScreen(navController: NavController, viewModel: MovieViewModel, movieId
         } else {
             MovieScreenBody(viewModel)
         }
-        if (status.value!!.isStart) {
+        if (!status.value!!.isGetProfile && !status.value!!.makingRequest) {
+            viewModel.beforeInit()
+        } else if (status.value!!.isStart && !status.value!!.makingRequest) {
             viewModel.initialScreen(movieId!!)
         }
     }
@@ -203,6 +206,9 @@ fun MovieScreen(navController: NavController, viewModel: MovieViewModel, movieId
 @Composable
 fun MovieScreenBody(viewModel: MovieViewModel) {
     val status = viewModel.status.observeAsState()
+    val isShow = viewModel.showDialog.observeAsState(false)
+
+    if (isShow.value) ReviewDialog(viewModel, isShow)
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth()
@@ -222,10 +228,127 @@ fun MovieScreenBody(viewModel: MovieViewModel) {
             Genres(viewModel)
         }
         item {
-            Reviews(viewModel)
+            ReviewText(viewModel)
         }
-        item {
-            Spacer(modifier = Modifier)
+        status.value!!.movieDetail!!.reviews?.let {
+            items(it) { review ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
+                        .border(1.dp, MaterialTheme.colors.secondary, MaterialTheme.shapes.medium)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            GlideImage(
+                                imageModel = { review.author?.avatar },
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape),
+                                failure = {
+                                    Image(
+                                        bitmap = ImageBitmap.imageResource(R.drawable.avatar_default),
+                                        contentDescription = null
+                                    )
+                                }
+                            )
+                            Column(modifier = Modifier.padding(start = 16.dp)) {
+                                Text(
+                                    text = if (review.isAnonymous || review.author == null) {
+                                        stringResource(R.string.anonymous_user)
+                                    } else {
+                                        review.author.nickName
+                                    },
+                                    style = MaterialTheme.typography.h5,
+                                    color = MaterialTheme.colors.primaryVariant
+                                )
+                                if ((review.author?.userId ?: stringResource(R.string.error))
+                                    == viewModel.myReviewInfo.value?.author?.userId
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.my_review),
+                                        style = MaterialTheme.typography.h4,
+                                        color = MaterialTheme.colors.secondaryVariant
+                                    )
+                                }
+                            }
+
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.TopEnd
+                            ) {
+                                Text(
+                                    text = review.rating.toString(),
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.body1,
+                                    color = MaterialTheme.colors.primaryVariant,
+                                    modifier = Modifier
+                                        .size(42.dp, 28.dp)
+                                        .clip(MaterialTheme.shapes.large)
+                                        .background(
+                                            Color(
+                                                red = calculateRedByMark(review.rating.toFloat()),
+                                                green = calculateGreenByMark(review.rating.toFloat()),
+                                                blue = 0f
+                                            )
+                                        )
+                                        .padding(top = 2.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.padding(4.dp))
+                        review.reviewText?.let { text ->
+                            Text(
+                                text = text,
+                                style = MaterialTheme.typography.body1,
+                                color = MaterialTheme.colors.primaryVariant
+                            )
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = parsingISO8601(review.createDateTime),
+                                style = MaterialTheme.typography.body1,
+                                color = MaterialTheme.colors.secondaryVariant
+                            )
+                            if ((review.author?.userId ?: stringResource(R.string.error))
+                                == viewModel.myReviewInfo.value?.author?.userId
+                            ) {
+                                Row {
+                                    Image(
+                                        bitmap = ImageBitmap.imageResource(R.drawable.edit_review),
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clickable {
+                                                viewModel.changeShowDialog(!isShow.value)
+                                            }
+                                    )
+                                    Spacer(modifier = Modifier.padding(4.dp))
+                                    Image(
+                                        bitmap = ImageBitmap.imageResource(R.drawable.delete_review),
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clickable {
+                                                viewModel.deleteReview()
+                                            }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
         }
     }
 }
@@ -349,11 +472,9 @@ fun Genres(viewModel: MovieViewModel) {
 }
 
 @Composable
-fun Reviews(viewModel: MovieViewModel) {
+fun ReviewText(viewModel: MovieViewModel) {
     val status = viewModel.status.observeAsState()
     val isShow = viewModel.showDialog.observeAsState(false)
-
-    if (isShow.value) ReviewDialog(viewModel, isShow)
 
     Column(
         modifier = Modifier
@@ -381,119 +502,5 @@ fun Reviews(viewModel: MovieViewModel) {
                 )
             }
         }
-
-        status.value!!.movieDetail!!.reviews?.forEach { review ->
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-                    .border(1.dp, MaterialTheme.colors.secondary, MaterialTheme.shapes.medium)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        GlideImage(
-                            imageModel = { review.author.avatar },
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape),
-                            failure = {
-                                Image(
-                                    bitmap = ImageBitmap.imageResource(R.drawable.avatar_default),
-                                    contentDescription = null
-                                )
-                            }
-                        )
-                        Column(modifier = Modifier.padding(start = 16.dp)) {
-                            Text(
-                                text = if (review.isAnonymous) stringResource(R.string.anonymous_user) else review.author.nickName,
-                                style = MaterialTheme.typography.h5,
-                                color = MaterialTheme.colors.primaryVariant
-                            )
-                            if (review.author.userId == viewModel.userProf.value?.userId) {
-                                Text(
-                                    text = stringResource(R.string.my_review),
-                                    style = MaterialTheme.typography.h4,
-                                    color = MaterialTheme.colors.secondaryVariant
-                                )
-                            }
-                        }
-
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.TopEnd
-                        ) {
-                            Text(
-                                text = review.rating.toString(),
-                                textAlign = TextAlign.Center,
-                                style = MaterialTheme.typography.body1,
-                                color = MaterialTheme.colors.primaryVariant,
-                                modifier = Modifier
-                                    .size(42.dp, 28.dp)
-                                    .clip(MaterialTheme.shapes.large)
-                                    .background(
-                                        Color(
-                                            red = calculateRedByMark(review.rating.toFloat()),
-                                            green = calculateGreenByMark(review.rating.toFloat()),
-                                            blue = 0f
-                                        )
-                                    )
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.padding(4.dp))
-                    review.reviewText?.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.body1,
-                            color = MaterialTheme.colors.primaryVariant
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = parsingISO8601(review.createDateTime),
-                            style = MaterialTheme.typography.body1,
-                            color = MaterialTheme.colors.secondaryVariant
-                        )
-                        if (review.author.userId == viewModel.userProf.value?.userId) {
-                            if (!status.value!!.userHaveReview) {
-                                viewModel.setMyReviewInfo(review)
-                            }
-                            Row {
-                                Image(
-                                    bitmap = ImageBitmap.imageResource(R.drawable.edit_review),
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .clickable {
-                                            viewModel.changeShowDialog(!isShow.value)
-                                        }
-                                )
-                                Spacer(modifier = Modifier.padding(4.dp))
-                                Image(
-                                    bitmap = ImageBitmap.imageResource(R.drawable.delete_review),
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .clickable {
-                                            viewModel.deleteReview(review.id)
-                                        }
-                                )
-                            }
-                        }
-                    }
-                }
-
-            }
-        }
-
     }
 }
