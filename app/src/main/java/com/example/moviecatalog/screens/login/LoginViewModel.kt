@@ -57,10 +57,18 @@ class LoginViewModel : ViewModel() {
                             showMessage = true,
                             textMessage = MessageController.getTextMessage(MessageController.AUTH_SUCCESS)
                         )
+                        _name.value = ""
+                        _password.value = ""
+                        _entrance.value = false
                     }.onFailure {
                         status.value = status.value!!.copy(
                             isError = true,
-                            errorMessage = it.message
+                            errorMessage = if (it.message?.contains(Regex("400")) == true) {
+                                _entrance.value = false
+                                MessageController.getTextMessage(MessageController.INVALID_LOGIN_PASSWORD)
+                            } else {
+                                it.message
+                            }
                         )
                     }
                 }

@@ -16,6 +16,8 @@ object MessageController {
     const val REVIEW_ADD = 9
     const val REVIEW_CHANGE = 10
     const val REVIEW_DELETE = 11
+    const val INVALID_LOGIN_PASSWORD = 12
+    const val PASSWORD_SHORT = 13
 
     fun getTextMessage(messageCode: Int): String {
         return when (messageCode) {
@@ -30,6 +32,8 @@ object MessageController {
             REVIEW_ADD -> MainActivity.myResources.getString(R.string.review_add)
             REVIEW_CHANGE -> MainActivity.myResources.getString(R.string.review_change)
             REVIEW_DELETE -> MainActivity.myResources.getString(R.string.review_delete)
+            INVALID_LOGIN_PASSWORD -> MainActivity.myResources.getString(R.string.invalid_login_password)
+            PASSWORD_SHORT -> MainActivity.myResources.getString(R.string.password_short)
             else -> ""
         }
     }

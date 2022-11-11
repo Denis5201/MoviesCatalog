@@ -50,4 +50,6 @@
     <string name="review_change">Отзыв изменён</string>
     <string name="review_delete">Отзыв удалён</string>
     <string name="error">Ошибка</string>
+    <string name="invalid_login_password">Неверный логин или пароль</string>
+    <string name="password_short">Пароль должен содержать не меньше 6 символов</string>
 </resources>

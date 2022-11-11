@@ -1,6 +1,5 @@
 package com.example.moviecatalog.screens.profile
 
-import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.moviecatalog.Shared
 import com.example.moviecatalog.domain.MessageController
 import com.example.moviecatalog.domain.ProfileModel
+import com.example.moviecatalog.domain.Validator
 import com.example.moviecatalog.repository.AuthRepository
 import com.example.moviecatalog.repository.UserRepository
 import com.example.moviecatalog.screens.parsingISO8601
@@ -74,10 +74,6 @@ class ProfileViewModel : ViewModel() {
                 && date.value!!.isNotEmpty() && selectGender.value != 2
     }
 
-    private fun isCorrectMail(): Boolean {
-        return Patterns.EMAIL_ADDRESS.matcher(_mail.value!!).matches()
-    }
-
     init {
         status.value = status.value?.copy(
             isLoading = true
@@ -112,11 +108,12 @@ class ProfileViewModel : ViewModel() {
     }
 
     fun putProfile() {
-        if (!isCorrectMail()) {
+        if (!Validator.isCorrectMail(_mail.value!!)) {
             status.value = status.value!!.copy(
                 showMessage = true,
                 textMessage = MessageController.getTextMessage(MessageController.WRONG_FORMAT_MAIL)
             )
+            _save.value = false
             return
         }
 
@@ -137,6 +134,7 @@ class ProfileViewModel : ViewModel() {
                             showMessage = true,
                             textMessage = MessageController.getTextMessage(MessageController.SAVE_PROFILE_SUCCESS)
                         )
+                        _save.value = false
                     }.onFailure {
                         status.value = status.value!!.copy(
                             isError = true,

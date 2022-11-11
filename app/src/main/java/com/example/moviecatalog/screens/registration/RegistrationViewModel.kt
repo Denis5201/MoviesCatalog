@@ -1,6 +1,5 @@
 package com.example.moviecatalog.screens.registration
 
-import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.moviecatalog.Shared
 import com.example.moviecatalog.domain.MessageController
 import com.example.moviecatalog.domain.UserRegisterModel
+import com.example.moviecatalog.domain.Validator
 import com.example.moviecatalog.repository.AuthRepository
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -31,7 +31,6 @@ class RegistrationViewModel : ViewModel() {
     fun setMail(value: String) {
         _mail.value = value
         mayRegister()
-        isCorrectMail()
     }
 
     private val _name = MutableLiveData("")
@@ -46,7 +45,6 @@ class RegistrationViewModel : ViewModel() {
     fun setPassword(value: String) {
         _password.value = value
         mayRegister()
-        isEqualPasswords()
     }
 
     private val _confirmPassword = MutableLiveData("")
@@ -54,7 +52,6 @@ class RegistrationViewModel : ViewModel() {
     fun setConfirmPassword(value: String) {
         _confirmPassword.value = value
         mayRegister()
-        isEqualPasswords()
     }
 
     private val dateToFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
@@ -92,27 +89,29 @@ class RegistrationViewModel : ViewModel() {
                 && _selectGender.value != 2
     }
 
-    private fun isCorrectMail(): Boolean {
-        return Patterns.EMAIL_ADDRESS.matcher(_mail.value!!).matches()
-    }
-
-    private fun isEqualPasswords(): Boolean {
-        return _password.value == _confirmPassword.value
-    }
-
     fun getRegisterRequest() {
-        if (!isCorrectMail()) {
+        if (!Validator.isCorrectMail(_mail.value!!)) {
             status.value = status.value!!.copy(
                 showMessage = true,
                 textMessage = MessageController.getTextMessage(MessageController.WRONG_FORMAT_MAIL)
             )
+            _registration.value = false
             return
         }
-        if (!isEqualPasswords()) {
+        if (Validator.isPasswordShort(_password.value!!)) {
+            status.value = status.value!!.copy(
+                showMessage = true,
+                textMessage = MessageController.getTextMessage(MessageController.PASSWORD_SHORT)
+            )
+            _registration.value = false
+            return
+        }
+        if (!Validator.isEqualPasswords(_password.value!!, _confirmPassword.value!!)) {
             status.value = status.value!!.copy(
                 showMessage = true,
                 textMessage = MessageController.getTextMessage(MessageController.PASSWORDS_NOT_EQUAL)
             )
+            _registration.value = false
             return
         }
         viewModelScope.launch {
